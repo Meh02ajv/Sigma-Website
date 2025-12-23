@@ -42,6 +42,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $birth_date = sanitize($_POST['birth_date']);
     $bac_year = (int)sanitize($_POST['bac_year']);
     $studies = sanitize($_POST['studies']);
+    
+    // New optional fields
+    $profession = isset($_POST['profession']) ? sanitize($_POST['profession']) : null;
+    $company = isset($_POST['company']) ? sanitize($_POST['company']) : null;
+    $city = isset($_POST['city']) ? sanitize($_POST['city']) : null;
+    $country = isset($_POST['country']) ? sanitize($_POST['country']) : null;
+    $interests = isset($_POST['interests']) ? sanitize($_POST['interests']) : null;
 
     // Validate inputs
     if (empty($full_name) || empty($birth_date) || empty($bac_year) || empty($studies)) {
@@ -110,9 +117,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Update user in database
-    $query = "UPDATE users SET full_name = ?, birth_date = ?, bac_year = ?, studies = ?";
-    $params = [$full_name, $birth_date, $bac_year, $studies];
-    $types = 'ssis';
+    $query = "UPDATE users SET full_name = ?, birth_date = ?, bac_year = ?, studies = ?, profession = ?, company = ?, city = ?, country = ?, interests = ?";
+    $params = [$full_name, $birth_date, $bac_year, $studies, $profession, $company, $city, $country, $interests];
+    $types = 'ssissssss';
 
     if ($profile_picture) {
         $query .= ", profile_picture = ?";

@@ -88,6 +88,13 @@ $bac_year = filter_var($_POST['bac_year'], FILTER_SANITIZE_NUMBER_INT);
 $studies = htmlspecialchars(trim($_POST['studies']), ENT_QUOTES, 'UTF-8');
 $password = isset($_POST['password']) ? $_POST['password'] : null;
 
+// New optional fields
+$profession = isset($_POST['profession']) ? htmlspecialchars(trim($_POST['profession']), ENT_QUOTES, 'UTF-8') : null;
+$company = isset($_POST['company']) ? htmlspecialchars(trim($_POST['company']), ENT_QUOTES, 'UTF-8') : null;
+$city = isset($_POST['city']) ? htmlspecialchars(trim($_POST['city']), ENT_QUOTES, 'UTF-8') : null;
+$country = isset($_POST['country']) ? htmlspecialchars(trim($_POST['country']), ENT_QUOTES, 'UTF-8') : null;
+$interests = isset($_POST['interests']) ? htmlspecialchars(trim($_POST['interests']), ENT_QUOTES, 'UTF-8') : null;
+
 // Validate required fields for other updates
 if (empty($full_name) || empty($birth_date) || empty($bac_year) || empty($studies)) {
     $_SESSION['error'] = "Tous les champs obligatoires doivent être remplis.";
@@ -195,9 +202,9 @@ if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] !==
 }
 
 // Build SQL update
-$update_fields = "full_name = ?, birth_date = ?, bac_year = ?, studies = ?";
-$params = [$full_name, $birth_date, $bac_year, $studies];
-$types = "ssis";
+$update_fields = "full_name = ?, birth_date = ?, bac_year = ?, studies = ?, profession = ?, company = ?, city = ?, country = ?, interests = ?";
+$params = [$full_name, $birth_date, $bac_year, $studies, $profession, $company, $city, $country, $interests];
+$types = "ssissssss";
 
 if ($profile_picture !== null) {
     $update_fields .= ", profile_picture = ?";

@@ -99,13 +99,24 @@ if ($user && !empty($user['full_name']) && !empty($user['birth_date']) && !empty
         .form-group input[type="text"],
         .form-group input[type="email"],
         .form-group input[type="date"],
-        .form-group input[type="number"] {
+        .form-group input[type="number"],
+        .form-group textarea {
             width: 100%;
             padding: 12px;
             border: 1px solid #ddd;
             border-radius: 5px;
             box-sizing: border-box;
             font-size: 14px;
+        }
+        .form-group textarea {
+            resize: vertical;
+            font-family: inherit;
+            min-height: 80px;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #d4af37;
         }
         .form-group input[readonly] {
             background-color: #e9ecef;
@@ -212,6 +223,26 @@ if ($user && !empty($user['full_name']) && !empty($user['birth_date']) && !empty
             <div class="form-group">
                 <label for="studies"><i class="fas fa-book"></i> Études</label>
                 <input type="text" id="studies" name="studies" placeholder="Études" required>
+            </div>
+            <div class="form-group">
+                <label for="profession"><i class="fas fa-briefcase"></i> Profession</label>
+                <input type="text" id="profession" name="profession" placeholder="Profession actuelle">
+            </div>
+            <div class="form-group">
+                <label for="company"><i class="fas fa-building"></i> Entreprise</label>
+                <input type="text" id="company" name="company" placeholder="Nom de l'entreprise">
+            </div>
+            <div class="form-group">
+                <label for="city"><i class="fas fa-map-marker-alt"></i> Ville</label>
+                <input type="text" id="city" name="city" placeholder="Ville de résidence">
+            </div>
+            <div class="form-group">
+                <label for="country"><i class="fas fa-globe"></i> Pays</label>
+                <input type="text" id="country" name="country" placeholder="Pays de résidence">
+            </div>
+            <div class="form-group">
+                <label for="interests"><i class="fas fa-heart"></i> Centres d'intérêt</label>
+                <textarea id="interests" name="interests" placeholder="Vos centres d'intérêt (sport, musique, voyages...)" rows="3"></textarea>
             </div>
             <div class="form-group photo-btn">
                 <label for="profile_picture"><i class="fas fa-camera"></i> Ajouter une photo</label>

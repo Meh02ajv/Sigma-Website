@@ -15,7 +15,7 @@ $csrf_token = bin2hex(random_bytes(32));
 $_SESSION['csrf_token'] = $csrf_token;
 
 // Fetch user data
-$stmt = $conn->prepare("SELECT full_name, birth_date, bac_year, studies, profile_picture FROM users WHERE email = ?");
+$stmt = $conn->prepare("SELECT full_name, birth_date, bac_year, studies, profile_picture, profession, company, city, country, interests FROM users WHERE email = ?");
 $stmt->bind_param("s", $user_email);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -187,8 +187,15 @@ $default_image = 'img/profile_pic.jpeg';
             transition: var(--transition);
             background-color: #f9f9f9;
         }
+        
+        .form-control textarea,
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
 
-        .form-control:focus {
+        .form-control:focus,
+        textarea.form-control:focus {
             outline: none;
             border-color: var(--secondary-color);
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
@@ -409,6 +416,46 @@ $default_image = 'img/profile_pic.jpeg';
                     <div class="input-icon">
                         <i class="fas fa-book"></i>
                         <input type="text" id="studies" name="studies" class="form-control" placeholder="Votre parcours académique" value="<?php echo htmlspecialchars($user['studies'] ?? ''); ?>" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="profession">Profession</label>
+                    <div class="input-icon">
+                        <i class="fas fa-briefcase"></i>
+                        <input type="text" id="profession" name="profession" class="form-control" placeholder="Votre profession actuelle" value="<?php echo htmlspecialchars($user['profession'] ?? ''); ?>">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="company">Entreprise</label>
+                    <div class="input-icon">
+                        <i class="fas fa-building"></i>
+                        <input type="text" id="company" name="company" class="form-control" placeholder="Nom de l'entreprise" value="<?php echo htmlspecialchars($user['company'] ?? ''); ?>">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="city">Ville</label>
+                    <div class="input-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <input type="text" id="city" name="city" class="form-control" placeholder="Ville de résidence" value="<?php echo htmlspecialchars($user['city'] ?? ''); ?>">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="country">Pays</label>
+                    <div class="input-icon">
+                        <i class="fas fa-globe"></i>
+                        <input type="text" id="country" name="country" class="form-control" placeholder="Pays de résidence" value="<?php echo htmlspecialchars($user['country'] ?? ''); ?>">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="interests">Centres d'intérêt</label>
+                    <div class="input-icon">
+                        <i class="fas fa-heart"></i>
+                        <textarea id="interests" name="interests" class="form-control" placeholder="Vos passions et centres d'intérêt" rows="3"><?php echo htmlspecialchars($user['interests'] ?? ''); ?></textarea>
                     </div>
                 </div>
                 
