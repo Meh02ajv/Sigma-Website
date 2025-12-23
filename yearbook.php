@@ -32,6 +32,10 @@ checkBirthdayReminders($conn);
 // Initial filters and pagination
 $bac_year = isset($_GET['bac_year']) ? sanitize($_GET['bac_year']) : '';
 $studies = isset($_GET['studies']) ? sanitize($_GET['studies']) : '';
+$search_name = isset($_GET['search_name']) ? sanitize($_GET['search_name']) : '';
+$profession = isset($_GET['profession']) ? sanitize($_GET['profession']) : '';
+$city = isset($_GET['city']) ? sanitize($_GET['city']) : '';
+$company = isset($_GET['company']) ? sanitize($_GET['company']) : '';
 $sort_by = isset($_GET['sort_by']) ? sanitize($_GET['sort_by']) : 'full_name';
 $sort_order = isset($_GET['sort_order']) && in_array(strtoupper($_GET['sort_order']), ['ASC', 'DESC']) ? strtoupper($_GET['sort_order']) : 'ASC';
 $limit = 12;
@@ -43,24 +47,53 @@ if (!in_array($sort_by, $allowed_sort_columns)) {
     $sort_by = 'full_name';
 }
 
-// Build SQL query with birthday check - SUPPRIMER COMPLÈTEMENT LA RECHERCHE
+// Build SQL query with birthday check and advanced search
 $current_date = date('m-d');
-$query = "SELECT id, full_name, email, birth_date, studies, bac_year, profile_picture, 
+$query = "SELECT id, full_name, email, birth_date, studies, bac_year, profile_picture,
+          profession, company, city, country,
           CASE WHEN DATE_FORMAT(birth_date, '%m-%d') = ? THEN 1 ELSE 0 END AS is_birthday 
           FROM users WHERE 1=1";
 $params = [$current_date];
 $types = 's';
+
+if ($search_name) {
+    $query .= " AND (full_name LIKE ? OR email LIKE ?)";
+    $search_param = "%$search_name%";
+    $params[] = $search_param;
+    $params[] = $search_param;
+    $types .= 'ss';
+}
+
 if ($bac_year) {
     $query .= " AND bac_year = ?";
     $params[] = $bac_year;
     $types .= 'i';
 }
+
 if ($studies) {
     $query .= " AND studies LIKE ?";
     $params[] = "%$studies%";
     $types .= 's';
 }
-// SUPPRIMÉ : Plus de recherche par nom ou email
+
+if ($profession) {
+    $query .= " AND profession LIKE ?";
+    $params[] = "%$profession%";
+    $types .= 's';
+}
+
+if ($city) {
+    $query .= " AND city LIKE ?";
+    $params[] = "%$city%";
+    $types .= 's';
+}
+
+if ($company) {
+    $query .= " AND company LIKE ?";
+    $params[] = "%$company%";
+    $types .= 's';
+}
+
 $query .= " ORDER BY $sort_by $sort_order LIMIT ? OFFSET ?";
 $params[] = $limit;
 $params[] = $offset;
@@ -910,8 +943,15 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
         <button class="close-filters" id="closeFilters">&times;</button>
         
         <div class="filters">
+            <!-- Recherche par nom/prénom avec autocomplétion -->
             <div class="filter-group">
-                <label for="yearFilter">Année du BAC</label>
+                <label for="searchName"><i class="fas fa-search"></i> Rechercher par nom</label>
+                <input type="text" id="searchName" placeholder="Nom ou prénom..." value="<?php echo htmlspecialchars($search_name); ?>" autocomplete="off">
+                <div id="autocompleteResults" style="display:none; position:absolute; background:white; border:1px solid #ddd; max-height:200px; overflow-y:auto; width:calc(100% - 2rem); z-index:1000;"></div>
+            </div>
+            
+            <div class="filter-group">
+                <label for="yearFilter"><i class="fas fa-graduation-cap"></i> Année du BAC</label>
                 <select id="yearFilter">
                     <option value="">Toutes les années</option>
                     <?php
@@ -926,7 +966,7 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
             </div>
             
             <div class="filter-group">
-                <label for="studyFilter">Filière</label>
+                <label for="studyFilter"><i class="fas fa-book"></i> Filière</label>
                 <select id="studyFilter">
                     <option value="">Toutes les filières</option>
                     <?php
@@ -940,10 +980,26 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
                 </select>
             </div>
             
-            <!-- SUPPRIMÉ : Champ de recherche desktop -->
+            <!-- Nouveau: Recherche par profession -->
+            <div class="filter-group">
+                <label for="professionFilter"><i class="fas fa-briefcase"></i> Profession</label>
+                <input type="text" id="professionFilter" placeholder="Ex: Ingénieur, Médecin..." value="<?php echo htmlspecialchars($profession); ?>">
+            </div>
+            
+            <!-- Nouveau: Recherche par entreprise -->
+            <div class="filter-group">
+                <label for="companyFilter"><i class="fas fa-building"></i> Entreprise</label>
+                <input type="text" id="companyFilter" placeholder="Ex: Google, Microsoft..." value="<?php echo htmlspecialchars($company); ?>">
+            </div>
+            
+            <!-- Nouveau: Recherche par ville -->
+            <div class="filter-group">
+                <label for="cityFilter"><i class="fas fa-map-marker-alt"></i> Ville</label>
+                <input type="text" id="cityFilter" placeholder="Ex: Paris, Lomé..." value="<?php echo htmlspecialchars($city); ?>">
+            </div>
             
             <div class="filter-group">
-                <label for="sortBy">Trier par</label>
+                <label for="sortBy"><i class="fas fa-sort"></i> Trier par</label>
                 <select id="sortBy">
                     <option value="full_name" <?php echo $sort_by === 'full_name' ? 'selected' : ''; ?>>Nom</option>
                     <option value="bac_year" <?php echo $sort_by === 'bac_year' ? 'selected' : ''; ?>>Année du BAC</option>
@@ -951,15 +1007,15 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
             </div>
             
             <div class="filter-group">
-                <label for="sortOrder">Ordre</label>
+                <label for="sortOrder"><i class="fas fa-arrow-down"></i> Ordre</label>
                 <select id="sortOrder">
                     <option value="ASC" <?php echo $sort_order === 'ASC' ? 'selected' : ''; ?>>Croissant</option>
                     <option value="DESC" <?php echo $sort_order === 'DESC' ? 'selected' : ''; ?>>Décroissant</option>
                 </select>
             </div>
             
-            <button class="clear-btn" id="clearFilters">Réinitialiser</button>
-            <button class="apply-filters-btn" id="applyFilters">Appliquer les filtres</button>
+            <button class="clear-btn" id="clearFilters"><i class="fas fa-eraser"></i> Réinitialiser</button>
+            <button class="apply-filters-btn" id="applyFilters"><i class="fas fa-check"></i> Appliquer</button>
         </div>
     </div>
     
@@ -1154,7 +1210,7 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
             }
         }, 200));
 
-        // Load more profiles - SUPPRIMER LA RECHERCHE DES PARAMÈTRES
+        // Load more profiles - avec recherche avancée
         async function loadMoreProfiles() {
             if (isLoading) return;
             isLoading = true;
@@ -1162,8 +1218,16 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
             loading.classList.remove('hidden');
 
             try {
-                // SUPPRIMÉ : paramètre de recherche
-                const response = await fetch(`load_more_profiles.php?page=${page}&lastId=${lastId}&bac_year=${encodeURIComponent(document.getElementById('yearFilter').value)}&studies=${encodeURIComponent(document.getElementById('studyFilter').value)}&sort_by=${encodeURIComponent(document.getElementById('sortBy').value)}&sort_order=${encodeURIComponent(document.getElementById('sortOrder').value)}`);
+                const searchName = encodeURIComponent(document.getElementById('searchName').value);
+                const bacYear = encodeURIComponent(document.getElementById('yearFilter').value);
+                const studies = encodeURIComponent(document.getElementById('studyFilter').value);
+                const profession = encodeURIComponent(document.getElementById('professionFilter').value);
+                const company = encodeURIComponent(document.getElementById('companyFilter').value);
+                const city = encodeURIComponent(document.getElementById('cityFilter').value);
+                const sortBy = encodeURIComponent(document.getElementById('sortBy').value);
+                const sortOrder = encodeURIComponent(document.getElementById('sortOrder').value);
+                
+                const response = await fetch(`load_more_profiles.php?page=${page}&lastId=${lastId}&search_name=${searchName}&bac_year=${bacYear}&studies=${studies}&profession=${profession}&company=${company}&city=${city}&sort_by=${sortBy}&sort_order=${sortOrder}`);
                 const data = await response.json();
                 const profileGrid = document.getElementById('profileGrid');
                 
@@ -1181,19 +1245,43 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
                         card.dataset.bacyear = user.bac_year || 'Non spécifié';
                         card.dataset.birthday = user.is_birthday ? 'true' : 'false';
                         card.dataset.image = user.profile_picture || 'img/profile_pic.jpeg';
+                        
+                        // Construction des détails avec les nouveaux champs
+                        let detailsHTML = `
+                            <div class="profile-detail">
+                                <i class="fas fa-graduation-cap"></i>
+                                <span>${user.studies || 'Non spécifié'}</span>
+                            </div>
+                            <div class="profile-detail">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>${user.bac_year || 'Non spécifié'}</span>
+                            </div>
+                        `;
+                        
+                        if (user.profession) {
+                            detailsHTML += `
+                                <div class="profile-detail">
+                                    <i class="fas fa-briefcase"></i>
+                                    <span>${user.profession}</span>
+                                </div>
+                            `;
+                        }
+                        
+                        if (user.city) {
+                            detailsHTML += `
+                                <div class="profile-detail">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>${user.city}${user.country ? ', ' + user.country : ''}</span>
+                                </div>
+                            `;
+                        }
+                        
                         card.innerHTML = `
                             <img src="${user.profile_picture || 'img/profile_pic.jpeg'}" alt="Photo de profil" class="profile-image">
                             <div class="profile-info">
                                 <h3 class="profile-name">${user.full_name}</h3>
                                 <p class="profile-email">${user.email}</p>
-                                <div class="profile-detail">
-                                    <i class="fas fa-graduation-cap"></i>
-                                    <span>${user.studies || 'Non spécifié'}</span>
-                                </div>
-                                <div class="profile-detail">
-                                    <i class="fas fa-calendar-alt"></i>
-                                    <span>${user.bac_year || 'Non spécifié'}</span>
-                                </div>
+                                ${detailsHTML}
                             </div>
                             ${user.is_birthday ? '<span class="birthday-badge"><i class="fas fa-birthday-cake"></i> Anniversaire</span>' : ''}
                         `;
@@ -1257,24 +1345,96 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
             document.body.style.overflow = 'auto';
         }
 
-        // Reload profiles with new filters - SUPPRIMER LA RECHERCHE
+        // Reload profiles with new filters - avec recherche avancée
         function reloadProfiles() {
-            // SUPPRIMÉ : gestion de la recherche
-            window.location.href = `yearbook.php?bac_year=${encodeURIComponent(document.getElementById('yearFilter').value)}&studies=${encodeURIComponent(document.getElementById('studyFilter').value)}&sort_by=${encodeURIComponent(document.getElementById('sortBy').value)}&sort_order=${encodeURIComponent(document.getElementById('sortOrder').value)}`;
+            const searchName = encodeURIComponent(document.getElementById('searchName').value);
+            const bacYear = encodeURIComponent(document.getElementById('yearFilter').value);
+            const studies = encodeURIComponent(document.getElementById('studyFilter').value);
+            const profession = encodeURIComponent(document.getElementById('professionFilter').value);
+            const company = encodeURIComponent(document.getElementById('companyFilter').value);
+            const city = encodeURIComponent(document.getElementById('cityFilter').value);
+            const sortBy = encodeURIComponent(document.getElementById('sortBy').value);
+            const sortOrder = encodeURIComponent(document.getElementById('sortOrder').value);
+            
+            window.location.href = `yearbook.php?search_name=${searchName}&bac_year=${bacYear}&studies=${studies}&profession=${profession}&company=${company}&city=${city}&sort_by=${sortBy}&sort_order=${sortOrder}`;
         }
 
         // Event listeners for filters
         function setupFilterListeners() {
+            // Autocomplétion pour la recherche par nom
+            const searchInput = document.getElementById('searchName');
+            const autocompleteResults = document.getElementById('autocompleteResults');
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', debounce(async function() {
+                    const query = this.value.trim();
+                    
+                    if (query.length < 2) {
+                        autocompleteResults.style.display = 'none';
+                        return;
+                    }
+                    
+                    try {
+                        const response = await fetch(`autocomplete_users.php?q=${encodeURIComponent(query)}`);
+                        const data = await response.json();
+                        
+                        if (data.length > 0) {
+                            autocompleteResults.innerHTML = data.map(user => 
+                                `<div class="autocomplete-item" style="padding:0.8rem; cursor:pointer; border-bottom:1px solid #eee;" data-name="${user.full_name}">
+                                    <strong>${user.full_name}</strong><br>
+                                    <small style="color:#666;">${user.email} • ${user.bac_year || ''}</small>
+                                </div>`
+                            ).join('');
+                            autocompleteResults.style.display = 'block';
+                            
+                            // Ajout des événements click sur les résultats
+                            autocompleteResults.querySelectorAll('.autocomplete-item').forEach(item => {
+                                item.addEventListener('click', function() {
+                                    searchInput.value = this.dataset.name;
+                                    autocompleteResults.style.display = 'none';
+                                });
+                            });
+                        } else {
+                            autocompleteResults.style.display = 'none';
+                        }
+                    } catch (error) {
+                        console.error('Erreur autocomplétion:', error);
+                    }
+                }, 300));
+                
+                // Fermer l'autocomplétion si on clique ailleurs
+                document.addEventListener('click', function(e) {
+                    if (e.target !== searchInput && e.target.parentElement !== autocompleteResults) {
+                        autocompleteResults.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Événements sur les sélecteurs
             document.getElementById('yearFilter').addEventListener('change', () => reloadProfiles());
             document.getElementById('studyFilter').addEventListener('change', () => reloadProfiles());
             document.getElementById('sortBy').addEventListener('change', () => reloadProfiles());
             document.getElementById('sortOrder').addEventListener('change', () => reloadProfiles());
+            
+            // Bouton clear
             document.getElementById('clearFilters').addEventListener('click', () => {
+                document.getElementById('searchName').value = '';
                 document.getElementById('yearFilter').value = '';
                 document.getElementById('studyFilter').value = '';
+                document.getElementById('professionFilter').value = '';
+                document.getElementById('companyFilter').value = '';
+                document.getElementById('cityFilter').value = '';
                 document.getElementById('sortBy').value = 'full_name';
                 document.getElementById('sortOrder').value = 'ASC';
                 reloadProfiles();
+            });
+            
+            // Recherche en temps réel avec debounce pour les champs texte
+            ['professionFilter', 'companyFilter', 'cityFilter'].forEach(filterId => {
+                document.getElementById(filterId).addEventListener('input', debounce(() => {
+                    // Optionnel: recherche automatique après 1 seconde
+                    // reloadProfiles();
+                }, 1000));
             });
         }
 

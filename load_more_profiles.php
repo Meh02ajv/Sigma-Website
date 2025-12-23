@@ -4,7 +4,10 @@ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $lastId = isset($_GET['lastId']) ? (int)$_GET['lastId'] : 0;
 $bac_year = isset($_GET['bac_year']) ? sanitize($_GET['bac_year']) : '';
 $studies = isset($_GET['studies']) ? sanitize($_GET['studies']) : '';
-$search = isset($_GET['search']) ? sanitize($_GET['search']) : '';
+$search_name = isset($_GET['search_name']) ? sanitize($_GET['search_name']) : '';
+$profession = isset($_GET['profession']) ? sanitize($_GET['profession']) : '';
+$company = isset($_GET['company']) ? sanitize($_GET['company']) : '';
+$city = isset($_GET['city']) ? sanitize($_GET['city']) : '';
 $sort_by = isset($_GET['sort_by']) ? sanitize($_GET['sort_by']) : 'full_name';
 $sort_order = isset($_GET['sort_order']) && in_array(strtoupper($_GET['sort_order']), ['ASC', 'DESC']) ? strtoupper($_GET['sort_order']) : 'ASC';
 $limit = 12;
@@ -16,27 +19,51 @@ if (!in_array($sort_by, $allowed_sort_columns)) {
 }
 
 $current_date = date('m-d');
-$query = "SELECT id, full_name, email, birth_date, studies, bac_year, profile_picture, 
+$query = "SELECT id, full_name, email, birth_date, studies, bac_year, profile_picture,
+          profession, company, city, country,
           CASE WHEN DATE_FORMAT(birth_date, '%m-%d') = ? THEN 1 ELSE 0 END AS is_birthday 
           FROM users WHERE id > ?";
 $params = [$current_date, $lastId];
 $types = 'si';
+
+if ($search_name) {
+    $query .= " AND (full_name LIKE ? OR email LIKE ?)";
+    $search_param = "%$search_name%";
+    $params[] = $search_param;
+    $params[] = $search_param;
+    $types .= 'ss';
+}
+
 if ($bac_year) {
     $query .= " AND bac_year = ?";
     $params[] = $bac_year;
     $types .= 'i';
 }
+
 if ($studies) {
     $query .= " AND studies LIKE ?";
     $params[] = "%$studies%";
     $types .= 's';
 }
-if ($search) {
-    $query .= " AND (full_name LIKE ? OR email LIKE ?)";
-    $params[] = "%$search%";
-    $params[] = "%$search%";
-    $types .= 'ss';
+
+if ($profession) {
+    $query .= " AND profession LIKE ?";
+    $params[] = "%$profession%";
+    $types .= 's';
 }
+
+if ($company) {
+    $query .= " AND company LIKE ?";
+    $params[] = "%$company%";
+    $types .= 's';
+}
+
+if ($city) {
+    $query .= " AND city LIKE ?";
+    $params[] = "%$city%";
+    $types .= 's';
+}
+
 $query .= " ORDER BY $sort_by $sort_order LIMIT ? OFFSET ?";
 $params[] = $limit;
 $params[] = $offset;
