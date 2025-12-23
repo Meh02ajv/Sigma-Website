@@ -1,0 +1,33 @@
+# Configuration pour les uploads de gros fichiers (vidéos jusqu'à 2GB)
+
+# Augmenter les limites PHP
+php_value upload_max_filesize 2048M
+php_value post_max_size 2048M
+php_value memory_limit 512M
+php_value max_execution_time 600
+php_value max_input_time 600
+
+# Options générales
+Options -Indexes
+DirectoryIndex index.php index.html
+
+# Protection des fichiers sensibles
+<FilesMatch "\.(log|sql|ini)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Compression GZIP pour améliorer les performances
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Cache pour les médias
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType video/mp4 "access plus 1 year"
+    ExpiresByType video/webm "access plus 1 year"
+</IfModule>

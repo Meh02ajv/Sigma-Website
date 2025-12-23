@@ -1,0 +1,51 @@
+# Configuration sensible
+config.php
+config.production.php
+
+# Sessions PHP
+sessions/
+*.sess
+
+# Vendor (dépendances installées via Composer)
+vendor/
+
+# Fichiers uploadés par les utilisateurs
+uploads/
+souvenirs_pic/
+
+# Images et médias lourds
+img/*.jpg
+img/*.jpeg
+img/*.png
+img/*.gif
+img/*.mp4
+img/*.avi
+img/*.mov
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.mp4
+*.avi
+*.mov
+*.pdf
+
+# Garder seulement le dossier img/ vide
+!img/.gitkeep
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+*.log
+
+# Fichiers IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Fichiers temporaires
+*.tmp
+*.bak
+*.cache
