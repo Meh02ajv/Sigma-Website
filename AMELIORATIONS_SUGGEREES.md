@@ -18,47 +18,6 @@ Document de référence des fonctionnalités et améliorations proposées pour l
 **Impact :** ⭐⭐⭐⭐⭐ (Haute priorité)  
 **Complexité :** 🔧🔧🔧 (Moyenne)
 
----
-
-### 2. Recherche Avancée dans le Yearbook
-**État actuel :** Filtres basiques (année bac, études)  
-**À ajouter :**
-- Recherche par nom/prénom avec autocomplétion
-- Filtrage par compétences/domaine professionnel
-- Recherche géographique (ville actuelle)
-- Tags/centres d'intérêt communs
-- Recherche combinée (plusieurs critères)
-
-**Impact :** ⭐⭐⭐⭐⭐ (Haute priorité)  
-**Complexité :** 🔧🔧 (Facile-Moyenne)
-
-```sql
--- Nouvelles colonnes à ajouter dans la table users
-ALTER TABLE users ADD COLUMN profession VARCHAR(200);
-ALTER TABLE users ADD COLUMN company VARCHAR(200);
-ALTER TABLE users ADD COLUMN city VARCHAR(100);
-ALTER TABLE users ADD COLUMN country VARCHAR(100);
-ALTER TABLE users ADD COLUMN skills TEXT;
-ALTER TABLE users ADD COLUMN interests TEXT;
-```
-
----
-
-### 3. Profil Utilisateur Enrichi
-**État actuel :** Profil basique (nom, date naissance, année bac, études, photo)  
-**Champs à ajouter :**
-- Profession actuelle
-- Entreprise/Organisation
-- Ville/Pays de résidence
-- Réseaux sociaux (LinkedIn, Twitter, Instagram)
-- Compétences/Expertises (tags)
-- Centres d'intérêt
-- Bio/Description personnelle (500 caractères)
-- Disponibilité pour mentorat (Oui/Non)
-- Parcours professionnel (timeline)
-
-**Impact :** ⭐⭐⭐⭐⭐ (Haute priorité)  
-**Complexité :** 🔧🔧 (Facile-Moyenne)
 
 ---
 

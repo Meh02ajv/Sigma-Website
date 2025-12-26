@@ -916,6 +916,10 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
         </div>
         <div class="nav-icons">
             <a href="album.php" aria-label="Album"><i class="fas fa-images"></i></a>
+            <a href="notifications.php" aria-label="Notifications" class="notification-icon">
+                <i class="fas fa-bell"></i>
+                <span class="unread-count" id="notifications-count"></span>
+            </a>
             <a href="messaging.php" aria-label="Messagerie" class="message-icon">
                 <i class="fas fa-envelope"></i>
                 <span class="unread-count" id="unread-count"></span>
@@ -1232,6 +1236,24 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
                 unreadBadge.classList.toggle('show', totalUnread > 0);
             } catch (error) {
                 console.error('Error updating unread count:', error);
+            }
+        }
+
+        // Update unread notifications count
+        async function updateNotificationsCount() {
+            try {
+                const response = await fetch('get_notifications.php?action=count');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                if (data.success) {
+                    const notifBadge = document.getElementById('notifications-count');
+                    notifBadge.textContent = data.count;
+                    notifBadge.classList.toggle('show', data.count > 0);
+                }
+            } catch (error) {
+                console.error('Error updating notifications count:', error);
             }
         }
 
@@ -1558,6 +1580,10 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
             setupFilterListeners();
             setupModalListeners();
             setupMobileInterface();
+            updateNotificationsCount(); // Mettre à jour le compteur de notifications
+            
+            // Rafraîchir les compteurs régulièrement
+            setInterval(updateNotificationsCount, 30000); // Toutes les 30 secondes
             
             document.querySelectorAll('.profile-card').forEach(card => {
                 card.addEventListener('click', () => openProfileModal(card));
