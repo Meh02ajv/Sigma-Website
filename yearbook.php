@@ -1100,27 +1100,27 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
                         </div>
                     </div>
                     
-                    <div class="info-section" id="professionalSection" style="display:none;">
+                    <div class="info-section" id="professionalSection">
                         <h3 class="info-title">Informations professionnelles</h3>
-                        <div class="info-item" id="professionItem" style="display:none;">
+                        <div class="info-item" id="professionItem">
                             <span class="info-label"><i class="fas fa-briefcase"></i> Profession</span>
                             <span class="info-value" id="modalProfileProfession"></span>
                         </div>
-                        <div class="info-item" id="companyItem" style="display:none;">
+                        <div class="info-item" id="companyItem">
                             <span class="info-label"><i class="fas fa-building"></i> Entreprise</span>
                             <span class="info-value" id="modalProfileCompany"></span>
                         </div>
                     </div>
                     
-                    <div class="info-section" id="locationSection" style="display:none;">
+                    <div class="info-section" id="locationSection">
                         <h3 class="info-title">Localisation</h3>
-                        <div class="info-item" id="locationItem" style="display:none;">
-                            <span class="info-label"><i class="fas fa-map-marker-alt"></i> Localisation</span>
+                        <div class="info-item" id="locationItem">
+                            <span class="info-label"><i class="fas fa-map-marker-alt"></i> Ville</span>
                             <span class="info-value" id="modalProfileLocation"></span>
                         </div>
                     </div>
                     
-                    <div class="info-section" id="interestsSection" style="display:none;">
+                    <div class="info-section" id="interestsSection">
                         <h3 class="info-title">Centres d'intérêt</h3>
                         <div class="info-item">
                             <span class="info-value" id="modalProfileInterests" style="font-style: italic; color: #666;"></span>
@@ -1356,52 +1356,22 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
             document.getElementById('modalProfileBacYear').textContent = bacyear || 'Non spécifié';
             document.getElementById('modalProfileImage').src = image || 'img/profile_pic.jpeg';
             
-            // Afficher les informations professionnelles si disponibles
-            const professionalSection = document.getElementById('professionalSection');
-            const professionItem = document.getElementById('professionItem');
-            const companyItem = document.getElementById('companyItem');
+            // Afficher les informations professionnelles (toujours visibles)
+            document.getElementById('modalProfileProfession').textContent = profession || 'Non spécifié';
+            document.getElementById('modalProfileCompany').textContent = company || 'Non spécifié';
             
-            if (profession || company) {
-                professionalSection.style.display = 'block';
-                if (profession) {
-                    professionItem.style.display = 'block';
-                    document.getElementById('modalProfileProfession').textContent = profession;
-                } else {
-                    professionItem.style.display = 'none';
-                }
-                if (company) {
-                    companyItem.style.display = 'block';
-                    document.getElementById('modalProfileCompany').textContent = company;
-                } else {
-                    companyItem.style.display = 'none';
-                }
-            } else {
-                professionalSection.style.display = 'none';
-            }
-            
-            // Afficher la localisation si disponible
-            const locationSection = document.getElementById('locationSection');
-            const locationItem = document.getElementById('locationItem');
-            
+            // Afficher la localisation (toujours visible)
             if (city || country) {
-                locationSection.style.display = 'block';
-                locationItem.style.display = 'block';
                 let location = [];
                 if (city) location.push(city);
                 if (country) location.push(country);
                 document.getElementById('modalProfileLocation').textContent = location.join(', ');
             } else {
-                locationSection.style.display = 'none';
+                document.getElementById('modalProfileLocation').textContent = 'Non spécifié';
             }
             
-            // Afficher les centres d'intérêt si disponibles
-            const interestsSection = document.getElementById('interestsSection');
-            if (interests) {
-                interestsSection.style.display = 'block';
-                document.getElementById('modalProfileInterests').textContent = interests;
-            } else {
-                interestsSection.style.display = 'none';
-            }
+            // Afficher les centres d'intérêt (toujours visible)
+            document.getElementById('modalProfileInterests').textContent = interests || 'Non spécifié';
             
             document.getElementById('modalProfileContact').onclick = () => {
                 window.location.href = `mailto:${email}`;
