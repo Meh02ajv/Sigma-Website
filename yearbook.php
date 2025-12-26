@@ -297,6 +297,11 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
         .filter-group {
             flex: 1;
             min-width: 200px;
+            margin-right: 1rem;
+        }
+        
+        .filter-group:last-child {
+            margin-right: 0;
         }
         
         .filter-group label {
