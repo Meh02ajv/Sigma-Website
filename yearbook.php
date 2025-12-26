@@ -1030,6 +1030,11 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
                          data-birthdate="<?php echo htmlspecialchars($user['birth_date'] ?? ''); ?>" 
                          data-studies="<?php echo htmlspecialchars($user['studies'] ?? ''); ?>" 
                          data-bacyear="<?php echo $user['bac_year'] ?? ''; ?>"
+                         data-profession="<?php echo htmlspecialchars($user['profession'] ?? ''); ?>"
+                         data-company="<?php echo htmlspecialchars($user['company'] ?? ''); ?>"
+                         data-city="<?php echo htmlspecialchars($user['city'] ?? ''); ?>"
+                         data-country="<?php echo htmlspecialchars($user['country'] ?? ''); ?>"
+                         data-interests="<?php echo htmlspecialchars($user['interests'] ?? ''); ?>"
                          data-birthday="<?php echo $user['is_birthday'] ? 'true' : 'false'; ?>"
                          data-image="<?php echo $user['profile_picture'] ? htmlspecialchars($user['profile_picture']) : 'img/profile_pic.jpeg'; ?>">
                         <img src="<?php echo $user['profile_picture'] ? htmlspecialchars($user['profile_picture']) : 'img/profile_pic.jpeg'; ?>" alt="Photo de profil" class="profile-image">
@@ -1080,22 +1085,45 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
                 
                 <div class="tab-content active" id="tab-info">
                     <div class="info-section">
-                        <h3 class="info-title">Informations personnelles</h3>
+                        <h3 class="info-title">Informations académiques</h3>
                         <div class="info-item">
-                            <span class="info-label">Date de naissance</span>
-                            <span class="info-value" id="modalProfileBirthdate"></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Filière</span>
+                            <span class="info-label"><i class="fas fa-graduation-cap"></i> Filière</span>
                             <span class="info-value" id="modalProfileStudies"></span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Année du BAC</span>
+                            <span class="info-label"><i class="fas fa-calendar-alt"></i> Année du BAC</span>
                             <span class="info-value" id="modalProfileBacYear"></span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Statut</span>
-                            <span class="info-value">Alumni Sigma</span>
+                            <span class="info-label"><i class="fas fa-birthday-cake"></i> Date de naissance</span>
+                            <span class="info-value" id="modalProfileBirthdate"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section" id="professionalSection" style="display:none;">
+                        <h3 class="info-title">Informations professionnelles</h3>
+                        <div class="info-item" id="professionItem" style="display:none;">
+                            <span class="info-label"><i class="fas fa-briefcase"></i> Profession</span>
+                            <span class="info-value" id="modalProfileProfession"></span>
+                        </div>
+                        <div class="info-item" id="companyItem" style="display:none;">
+                            <span class="info-label"><i class="fas fa-building"></i> Entreprise</span>
+                            <span class="info-value" id="modalProfileCompany"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section" id="locationSection" style="display:none;">
+                        <h3 class="info-title">Localisation</h3>
+                        <div class="info-item" id="locationItem" style="display:none;">
+                            <span class="info-label"><i class="fas fa-map-marker-alt"></i> Localisation</span>
+                            <span class="info-value" id="modalProfileLocation"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section" id="interestsSection" style="display:none;">
+                        <h3 class="info-title">Centres d'intérêt</h3>
+                        <div class="info-item">
+                            <span class="info-value" id="modalProfileInterests" style="font-style: italic; color: #666;"></span>
                         </div>
                     </div>
                 </div>
@@ -1243,6 +1271,11 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
                         card.dataset.birthdate = user.birth_date || '';
                         card.dataset.studies = user.studies || 'Non spécifié';
                         card.dataset.bacyear = user.bac_year || 'Non spécifié';
+                        card.dataset.profession = user.profession || '';
+                        card.dataset.company = user.company || '';
+                        card.dataset.city = user.city || '';
+                        card.dataset.country = user.country || '';
+                        card.dataset.interests = user.interests || '';
                         card.dataset.birthday = user.is_birthday ? 'true' : 'false';
                         card.dataset.image = user.profile_picture || 'img/profile_pic.jpeg';
                         
@@ -1309,14 +1342,66 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
             const birthdate = element.dataset.birthdate;
             const studies = element.dataset.studies;
             const bacyear = element.dataset.bacyear;
+            const profession = element.dataset.profession;
+            const company = element.dataset.company;
+            const city = element.dataset.city;
+            const country = element.dataset.country;
+            const interests = element.dataset.interests;
             const image = element.dataset.image;
 
             document.getElementById('modalProfileName').textContent = name;
             document.getElementById('modalProfileEmail').textContent = email;
             document.getElementById('modalProfileBirthdate').textContent = formatBirthdate(birthdate);
-            document.getElementById('modalProfileStudies').textContent = studies;
-            document.getElementById('modalProfileBacYear').textContent = bacyear;
+            document.getElementById('modalProfileStudies').textContent = studies || 'Non spécifié';
+            document.getElementById('modalProfileBacYear').textContent = bacyear || 'Non spécifié';
             document.getElementById('modalProfileImage').src = image || 'img/profile_pic.jpeg';
+            
+            // Afficher les informations professionnelles si disponibles
+            const professionalSection = document.getElementById('professionalSection');
+            const professionItem = document.getElementById('professionItem');
+            const companyItem = document.getElementById('companyItem');
+            
+            if (profession || company) {
+                professionalSection.style.display = 'block';
+                if (profession) {
+                    professionItem.style.display = 'block';
+                    document.getElementById('modalProfileProfession').textContent = profession;
+                } else {
+                    professionItem.style.display = 'none';
+                }
+                if (company) {
+                    companyItem.style.display = 'block';
+                    document.getElementById('modalProfileCompany').textContent = company;
+                } else {
+                    companyItem.style.display = 'none';
+                }
+            } else {
+                professionalSection.style.display = 'none';
+            }
+            
+            // Afficher la localisation si disponible
+            const locationSection = document.getElementById('locationSection');
+            const locationItem = document.getElementById('locationItem');
+            
+            if (city || country) {
+                locationSection.style.display = 'block';
+                locationItem.style.display = 'block';
+                let location = [];
+                if (city) location.push(city);
+                if (country) location.push(country);
+                document.getElementById('modalProfileLocation').textContent = location.join(', ');
+            } else {
+                locationSection.style.display = 'none';
+            }
+            
+            // Afficher les centres d'intérêt si disponibles
+            const interestsSection = document.getElementById('interestsSection');
+            if (interests) {
+                interestsSection.style.display = 'block';
+                document.getElementById('modalProfileInterests').textContent = interests;
+            } else {
+                interestsSection.style.display = 'none';
+            }
             
             document.getElementById('modalProfileContact').onclick = () => {
                 window.location.href = `mailto:${email}`;
