@@ -35,15 +35,10 @@ $user_full_name = isset($_SESSION['full_name']) ? htmlspecialchars($_SESSION['fu
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="SIGMA Alumni - Communauté d'anciens élèves">
-    <meta name="theme-color" content="#2563eb">
     <title>SIGMA Alumni - <?php echo ucfirst(str_replace('.php', '', $current_page)); ?></title>
     
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json">
-    
-    <!-- Favicon et icônes Apple -->
+    <!-- Favicon -->
     <?php include 'includes/favicon.php'; ?>
-    <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
     
     <!-- FontAwesome 6.5.1 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -1029,10 +1024,9 @@ $user_full_name = isset($_SESSION['full_name']) ? htmlspecialchars($_SESSION['fu
         setInterval(updateMessageBadge, 5000);
         <?php endif; ?>
     </script>
-    <!-- PWA Service Worker Registration -->
-    <script>
-        // Enregistrer le Service Worker pour PWA
-        if ('serviceWorker' in navigator) {
+
+</body>
+</html>
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
                     .then(registration => {
