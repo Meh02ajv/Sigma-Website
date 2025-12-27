@@ -27,9 +27,13 @@ if ($theme_result && $row = $theme_result->fetch_assoc()) {
 // Récupérer la préférence de mode sombre de l'utilisateur
 $user_dark_mode = false;
 if (isset($_SESSION['user_id'])) {
-    $user_theme_result = $conn->query("SELECT dark_mode FROM users WHERE id = " . intval($_SESSION['user_id']) . " LIMIT 1");
-    if ($user_theme_result && $theme_row = $user_theme_result->fetch_assoc()) {
-        $user_dark_mode = (bool)$theme_row['dark_mode'];
+    // Vérifier si la colonne dark_mode existe avant de l'utiliser
+    $check_column = $conn->query("SHOW COLUMNS FROM users LIKE 'dark_mode'");
+    if ($check_column && $check_column->num_rows > 0) {
+        $user_theme_result = $conn->query("SELECT dark_mode FROM users WHERE id = " . intval($_SESSION['user_id']) . " LIMIT 1");
+        if ($user_theme_result && $theme_row = $user_theme_result->fetch_assoc()) {
+            $user_dark_mode = (bool)$theme_row['dark_mode'];
+        }
     }
 }
 $user_theme_preference = $user_dark_mode ? 'dark' : 'light';
