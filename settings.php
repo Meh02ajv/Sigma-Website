@@ -7,6 +7,7 @@
     <?php include 'includes/favicon.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/dark-mode.css">
     <style>
         :root {
             --primary-dark: #1a365d;
@@ -409,12 +410,18 @@
                     <i class="fas fa-exclamation-triangle"></i>
                     Signaler un utilisateur
                 </a>
+                
+                <button class="settings-btn theme-toggle-btn" data-theme-toggle aria-label="Changer de thème">
+                    <i class="fas fa-moon theme-icon"></i>
+                    <span class="theme-text">Mode Sombre</span>
+                </button>
             </div>
         </div>
     </div>
     
     <div class="sigma-watermark">SIGMA</div>
 
+    <script src="js/theme-manager.js"></script>
     <script>
         // Détection du toucher pour améliorer les interactions
         document.addEventListener('DOMContentLoaded', function() {
