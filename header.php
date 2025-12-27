@@ -24,26 +24,12 @@ if ($theme_result && $row = $theme_result->fetch_assoc()) {
     $active_theme = $row['theme_name'];
 }
 
-// Récupérer la préférence de mode sombre de l'utilisateur
-$user_dark_mode = false;
-if (isset($_SESSION['user_id'])) {
-    // Vérifier si la colonne dark_mode existe avant de l'utiliser
-    $check_column = $conn->query("SHOW COLUMNS FROM users LIKE 'dark_mode'");
-    if ($check_column && $check_column->num_rows > 0) {
-        $user_theme_result = $conn->query("SELECT dark_mode FROM users WHERE id = " . intval($_SESSION['user_id']) . " LIMIT 1");
-        if ($user_theme_result && $theme_row = $user_theme_result->fetch_assoc()) {
-            $user_dark_mode = (bool)$theme_row['dark_mode'];
-        }
-    }
-}
-$user_theme_preference = $user_dark_mode ? 'dark' : 'light';
-
 $isLoggedIn = isset($_SESSION['user_id']);
 $current_page = basename($_SERVER['PHP_SELF']);
 $user_full_name = isset($_SESSION['full_name']) ? htmlspecialchars($_SESSION['full_name']) : '';
 ?>
 <!DOCTYPE html>
-<html lang="fr" data-user-theme="<?php echo $user_theme_preference; ?>">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,10 +42,6 @@ $user_full_name = isset($_SESSION['full_name']) ? htmlspecialchars($_SESSION['fu
     
     <!-- FontAwesome 6.5.1 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
-    <!-- Dark Mode Support -->
-    <link rel="stylesheet" href="css/dark-mode.css">
-    
     <?php if ($active_theme !== 'none'): ?>
     <!-- Thème festif actif -->
     <link rel="stylesheet" href="festive_themes.css">
@@ -1042,6 +1024,3 @@ $user_full_name = isset($_SESSION['full_name']) ? htmlspecialchars($_SESSION['fu
         setInterval(updateMessageBadge, 5000);
         <?php endif; ?>
     </script>
-    
-    <!-- Dark Mode Script -->
-    <script src="js/theme-manager.js"></script>

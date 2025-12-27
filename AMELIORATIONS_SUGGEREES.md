@@ -6,17 +6,6 @@ Document de référence des fonctionnalités et améliorations proposées pour l
 
 ## 🎯 FONCTIONNALITÉS PRIORITAIRES
 
-### 1. Système de Notifications en Temps Réel
-**État actuel :** WebSocket implémenté uniquement pour la messagerie  
-**À ajouter :**
-- Notifications pour les nouveaux événements
-- Alertes pour les changements dans les élections
-- Notifications quand les admins traitent suggestions/rapports
-- Mentions dans les discussions
-- Badge de notification global (actuellement limité à la messagerie)
-
-**Impact :** ⭐⭐⭐⭐⭐ (Haute priorité)  
-**Complexité :** 🔧🔧🔧 (Moyenne)
 
 
 ---
@@ -90,33 +79,7 @@ CREATE TABLE event_registrations (
 
 ## 📱 EXPÉRIENCE UTILISATEUR
 
-### 6. Mode Sombre (Dark Mode)
-**Description :**
-- Toggle accessible dans settings.php
-- Préférence stockée en localStorage + base de données
-- Thème sombre cohérent sur toutes les pages
-- Respect de la préférence système (prefers-color-scheme)
-- Transition fluide entre les modes
 
-**Impact :** ⭐⭐⭐⭐ (Moyenne-Haute priorité)  
-**Complexité :** 🔧🔧 (Facile-Moyenne)
-
-```css
-/* Exemple de variables CSS pour le mode sombre */
-:root {
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8fafc;
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-}
-
-[data-theme="dark"] {
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-}
-```
 
 ---
 
