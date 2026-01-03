@@ -49,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $city = isset($_POST['city']) ? sanitize($_POST['city']) : null;
     $country = isset($_POST['country']) ? sanitize($_POST['country']) : null;
     $interests = isset($_POST['interests']) ? sanitize($_POST['interests']) : null;
+    $linkedin_url = isset($_POST['linkedin_url']) ? sanitize($_POST['linkedin_url']) : null;
 
     // Validate inputs
     if (empty($full_name) || empty($birth_date) || empty($bac_year) || empty($studies)) {
@@ -117,9 +118,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Update user in database
-    $query = "UPDATE users SET full_name = ?, birth_date = ?, bac_year = ?, studies = ?, profession = ?, company = ?, city = ?, country = ?, interests = ?";
-    $params = [$full_name, $birth_date, $bac_year, $studies, $profession, $company, $city, $country, $interests];
-    $types = 'ssissssss';
+    $query = "UPDATE users SET full_name = ?, birth_date = ?, bac_year = ?, studies = ?, profession = ?, company = ?, city = ?, country = ?, interests = ?, linkedin_url = ?";
+    $params = [$full_name, $birth_date, $bac_year, $studies, $profession, $company, $city, $country, $interests, $linkedin_url];
+    $types = 'ssisssssss';
 
     if ($profile_picture) {
         $query .= ", profile_picture = ?";
@@ -146,20 +147,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->Password = SMTP_PASSWORD;
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = SMTP_PORT;
+            $mail->CharSet = 'UTF-8';
 
             // Recipients
             $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
             $mail->addAddress($email, $full_name);
             $mail->addReplyTo(SMTP_REPLY_TO_EMAIL, SMTP_REPLY_TO_NAME);
+            
+            // Attacher le logo
+            $logo_path = __DIR__ . '/img/image.png';
+            if (file_exists($logo_path)) {
+                $mail->addEmbeddedImage($logo_path, 'logo', 'logo.png');
+            }
 
             // Content
             $mail->isHTML(true);
             $mail->Subject = 'Bienvenue sur la Communauté Sigma !';
             $mail->Body = "
                 <html>
+                <head><meta charset='UTF-8'></head>
                 <body style='font-family: Arial, sans-serif;'>
                     <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
-                        <img src='https://votre-domaine.com/img/image.png' alt='Sigma Logo' style='width: 100px;'>
+                        <img src='cid:logo' alt='Sigma Logo' style='width: 100px;'>
                         <h2 style='color: #1e3a8a;'>Bonjour $full_name,</h2>
                         <p>Félicitations ! Votre profil a été créé avec succès.</p>
                         <p>Nous sommes ravis de vous accueillir dans la Communauté Sigma. Vous pouvez maintenant explorer notre <a href='https://votre-domaine.com/yearbook.php' style='color: #1e3a8a; text-decoration: underline;'>Yearbook</a>.</p>
@@ -189,20 +198,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $admin_mail->Password = SMTP_PASSWORD;
             $admin_mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $admin_mail->Port = SMTP_PORT;
+            $admin_mail->CharSet = 'UTF-8';
 
             // Recipients
             $admin_mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
             $admin_mail->addAddress('gojomeh137@gmail.com', 'Administrateur');
             $admin_mail->addReplyTo(SMTP_REPLY_TO_EMAIL, SMTP_REPLY_TO_NAME);
+            
+            // Attacher le logo
+            if (file_exists($logo_path)) {
+                $admin_mail->addEmbeddedImage($logo_path, 'logo', 'logo.png');
+            }
 
             // Content
             $admin_mail->isHTML(true);
             $admin_mail->Subject = 'Nouveau profil créé sur la Communauté Sigma';
             $admin_mail->Body = "
                 <html>
+                <head><meta charset='UTF-8'></head>
                 <body style='font-family: Arial, sans-serif;'>
                     <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
-                        <img src='https://votre-domaine.com/img/image.png' alt='Sigma Logo' style='width: 100px;'>
+                        <img src='cid:logo' alt='Sigma Logo' style='width: 100px;'>
                         <h2 style='color: #1e3a8a;'>Nouveau profil créé</h2>
                         <p>Un nouveau profil a été créé sur la Communauté Sigma.</p>
                         <p><strong>Nom complet :</strong> $full_name</p>

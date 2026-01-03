@@ -395,7 +395,7 @@
             </div>
             
             <div class="settings-menu">
-                <a href="mod_prof.php" class="settings-btn">
+                <a href="mod_prof.php?from=settings.php" class="settings-btn">
                     <i class="fas fa-user-edit"></i>
                     Modifier mon profil
                 </a>

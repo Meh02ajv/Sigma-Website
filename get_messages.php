@@ -77,7 +77,7 @@ while ($row = $result->fetch_assoc()) {
         'message_id' => $row['message_id'],
         'sender_id' => (int)$row['sender_id'],
         'recipient_id' => (int)$row['recipient_id'],
-        'content' => htmlspecialchars($row['content'], ENT_QUOTES, 'UTF-8'),
+        'content' => $row['content'],
         'sent_at' => $row['sent_at'],
         'is_read' => (int)$row['is_read']
     ];
@@ -85,5 +85,5 @@ while ($row = $result->fetch_assoc()) {
 $stmt->close();
 
 header('Content-Type: application/json');
-echo json_encode($messages);
+echo json_encode($messages, JSON_UNESCAPED_UNICODE);
 ?>

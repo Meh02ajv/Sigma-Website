@@ -208,10 +208,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #1e3a8a;
             pointer-events: none;
         }
+        
+        .input-wrapper .toggle-password {
+            position: absolute;
+            right: 0.75rem;
+            left: auto;
+            color: #666;
+            pointer-events: auto;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .input-wrapper .toggle-password:hover {
+            color: #1e3a8a;
+        }
 
         input {
             width: 100%;
-            padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+            padding: 0.75rem 3rem 0.75rem 2.5rem;
             border: 2px solid #ddd;
             border-radius: 6px;
             font-size: 1rem;
@@ -298,6 +312,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .forgot-password a:hover {
             color: #d4af37;
             text-decoration: underline;
+        }
+        
+        .continue-without-account {
+            flex-basis: 100% !important;
+            margin-top: 1rem !important;
+            padding: 0.8rem 1.5rem;
+            background-color: #3498db;
+            color: white !important;
+            border-radius: 6px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .continue-without-account:hover {
+            background-color: #2980b9;
+            color: white !important;
+            text-decoration: none !important;
         }
 
         .divider {
@@ -484,6 +518,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         autocomplete="current-password"
                         aria-label="Mot de passe"
                     >
+                    <i class="fas fa-eye toggle-password" onclick="togglePassword('password', this)"></i>
                 </div>
             </div>
             
@@ -497,7 +532,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="password_reset.php">
                 <i class="fas fa-key"></i> Mot de passe oublié ?
             </a>
+            <a href="yearbook_public.php" style="color: #667eea; margin-top: 10px; display: block; text-align: center;">
+                <i class="fas fa-arrow-right"></i> Continuer sans compte
+            </a>
         </div>
     </div>
+    
+    <script>
+        function togglePassword(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
 </body>
 </html>

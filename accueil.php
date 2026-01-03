@@ -830,7 +830,7 @@ $member_count = $result ? $result->fetch_assoc()['member_count'] : 0;
         <p>Découvrez ce que notre plateforme offre à la communauté SIGMA Alumni</p>
     </div>
     <div class="features-grid">
-        <a href="connexion.php" class="feature-card">
+        <a href="connexion.php?redirect=annuaire" class="feature-card">
             <div class="feature-icon">
                 <i class="fas fa-address-book" aria-hidden="true"></i>
             </div>
@@ -875,13 +875,13 @@ $member_count = $result ? $result->fetch_assoc()['member_count'] : 0;
                     echo '<div class="news-item">';
                     if (!empty($news_item['image_path'])) {
                         echo '<div class="news-image">';
-                        echo '<img src="' . htmlspecialchars($news_item['image_path']) . '" alt="' . htmlspecialchars($news_item['title']) . '">';
+                        echo '<img src="' . htmlspecialchars($news_item['image_path']) . '" alt="' . $news_item['title'] . '">';
                         echo '</div>';
                     }
                     echo '<div class="news-content">';
-                    echo '<h3>' . htmlspecialchars($news_item['title']) . '</h3>';
+                    echo '<h3>' . $news_item['title'] . '</h3>';
                     echo '<div class="news-date">' . date('d/m/Y', strtotime($news_item['created_at'])) . '</div>';
-                    echo '<p>' . htmlspecialchars($news_item['excerpt']) . '</p>';
+                    echo '<p>' . $news_item['excerpt'] . '</p>';
                     echo '</div>';
                     echo '</div>';
                 }
@@ -904,11 +904,11 @@ $member_count = $result ? $result->fetch_assoc()['member_count'] : 0;
                     echo '<i class="fas fa-calendar-alt" aria-hidden="true"></i> ';
                     echo date('d/m/Y à H:i', strtotime($event['event_date']));
                     echo '</div>';
-                    echo '<h3>' . htmlspecialchars($event['title']) . '</h3>';
-                    echo '<p>' . htmlspecialchars($event['description']) . '</p>';
+                    echo '<h3>' . $event['title'] . '</h3>';
+                    echo '<p>' . $event['description'] . '</p>';
                     echo '<div class="event-location">';
                     echo '<i class="fas fa-map-marker-alt" aria-hidden="true"></i> ';
-                    echo htmlspecialchars($event['location']);
+                    echo $event['location'];
                     echo '</div>';
                     
                     // Add reminder button

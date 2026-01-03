@@ -74,6 +74,8 @@ async function pollNewMessages() {
                     // Marquer comme lu si c'est un message reçu
                     if (message.sender_id !== currentUserId) {
                         markAsRead(selectedUserId);
+                        // Déplacer le contact en haut de la liste
+                        moveContactToTop(selectedUserId);
                     }
                 }
             });
@@ -98,10 +100,18 @@ function displayMessage(message) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${message.sender_id === currentUserId ? 'sent' : 'received'}`;
     messageDiv.dataset.messageId = message.message_id;
-    messageDiv.innerHTML = `
-        <p>${escapeHtml(message.content)}</p>
-        <span class="timestamp">${formatTime(message.sent_at)}</span>
-    `;
+    
+    // Contenu du message (échappé automatiquement avec textContent)
+    const paragraph = document.createElement('p');
+    paragraph.textContent = message.content;
+    messageDiv.appendChild(paragraph);
+    
+    // Timestamp
+    const timestamp = document.createElement('span');
+    timestamp.className = 'timestamp';
+    timestamp.textContent = formatTime(message.sent_at);
+    messageDiv.appendChild(timestamp);
+    
     messagesDiv.appendChild(messageDiv);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
     hidePlaceholderMessages();
@@ -293,6 +303,30 @@ async function loadUnreadIndicators() {
     }
 }
 
+// Déplacer un contact en haut de la liste
+function moveContactToTop(userId) {
+    const userListHeader = document.querySelector('.user-list-header');
+    const card = document.querySelector(`.user-card[data-id="${userId}"]`);
+    
+    if (!card || !userListHeader) return;
+    
+    // Vérifier si la carte n'est pas déjà en première position
+    const firstCard = userListHeader.nextElementSibling;
+    if (firstCard === card) return;
+    
+    // Ajouter classe d'animation
+    card.classList.add('moving-to-top');
+    
+    // Retirer et réinsérer en haut
+    card.remove();
+    userListHeader.insertAdjacentElement('afterend', card);
+    
+    // Retirer la classe d'animation après l'animation
+    setTimeout(() => {
+        card.classList.remove('moving-to-top');
+    }, 500);
+}
+
 // Définir l'utilisateur actif
 function setActiveUser(card) {
     document.querySelectorAll('.user-card').forEach(c => c.classList.remove('active'));
@@ -350,6 +384,9 @@ async function sendMessage() {
                 displayedMessages.add(data.message.message_id);
                 lastMessageId = Math.max(lastMessageId, data.message.message_id);
             }
+            
+            // Déplacer le contact en haut de la liste
+            moveContactToTop(selectedUserId);
         } else {
             throw new Error(data.error || 'Erreur lors de l\'envoi du message');
         }
@@ -399,33 +436,9 @@ function handleUserSelection(card) {
 }
 
 // Bouton de retour sur mobile
-document.getElementById('back-button').addEventListener('click', resetChat);
+// Les event listeners sont maintenant dans DOMContentLoaded
 
-// Gestion de l'envoi de message
-const sendButton = document.getElementById('send-message');
-sendButton.addEventListener('click', sendMessage);
-
-// Gestion de la textarea
-const messageInput = document.getElementById('message-input');
-messageInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-    }
-});
-
-// Ajustement automatique de la hauteur de la textarea
-messageInput.addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = (this.scrollHeight) + 'px';
-    if (this.scrollHeight > 120) {
-        this.style.overflowY = 'auto';
-    } else {
-        this.style.overflowY = 'hidden';
-    }
-});
-
-// Gestion du redimensionnement de la fenêtre
+// Empêcher le zoom sur double tap (iOS)
 let resizeTimeout;
 window.addEventListener('resize', function() {
     clearTimeout(resizeTimeout);
@@ -456,6 +469,41 @@ document.addEventListener('touchend', function(event) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeMessaging();
     setupUserCardListeners();
+    
+    // Bouton de retour sur mobile
+    const backButton = document.getElementById('back-button');
+    if (backButton) {
+        backButton.addEventListener('click', resetChat);
+    }
+    
+    // Gestion de l'envoi de message
+    const sendButton = document.getElementById('send-message');
+    if (sendButton) {
+        sendButton.addEventListener('click', sendMessage);
+    }
+    
+    // Gestion de la textarea
+    const messageInput = document.getElementById('message-input');
+    
+    if (messageInput) {
+        messageInput.addEventListener('input', function() {
+            // Ajustement automatique de la hauteur
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            if (this.scrollHeight > 120) {
+                this.style.overflowY = 'auto';
+            } else {
+                this.style.overflowY = 'hidden';
+            }
+        });
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    }
     
     // Cacher la liste des utilisateurs sur mobile si une conversation est ouverte
     if (isMobile && selectedUserId) {

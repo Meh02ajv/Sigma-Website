@@ -96,10 +96,10 @@ if ($stmt->execute()) {
             'message_id' => (int)$message['message_id'],
             'sender_id' => (int)$message['sender_id'],
             'recipient_id' => (int)$message['recipient_id'],
-            'content' => htmlspecialchars($message['content'], ENT_QUOTES, 'UTF-8'),
+            'content' => $message['content'],
             'sent_at' => $message['sent_at']
         ]
-    ]);
+    ], JSON_UNESCAPED_UNICODE);
 } else {
     http_response_code(500);
     $stmt->close();

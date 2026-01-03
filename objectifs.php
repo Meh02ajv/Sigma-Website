@@ -237,7 +237,7 @@ $stmt->close();
                         <div class="objectif-icon">
                             <i class="<?php echo htmlspecialchars($objectif['icon']); ?>"></i>
                         </div>
-                        <h3><?php echo htmlspecialchars($objectif['title']); ?></h3>
+                        <h3><?php echo $objectif['title']; ?></h3>
                         <?php echo $purifier->purify($objectif['description']); ?>
                     </div>
                 <?php endforeach; ?>
@@ -250,7 +250,7 @@ $stmt->close();
                     <?php foreach ($values as $value): ?>
                         <div class="valeur-item">
                             <i class="<?php echo htmlspecialchars($value['icon']); ?>"></i>
-                            <h3><?php echo htmlspecialchars($value['title']); ?></h3>
+                            <h3><?php echo $value['title']; ?></h3>
                             <?php echo $purifier->purify($value['description']); ?>
                         </div>
                     <?php endforeach; ?>

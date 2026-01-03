@@ -1,9 +1,10 @@
 # 🎓 SIGMA Alumni - Plateforme de Réseau des Anciens Élèves
 
-![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)
 ![PHP](https://img.shields.io/badge/PHP-7.4%2B-purple.svg)
 ![MySQL](https://img.shields.io/badge/MySQL-5.7%2B-orange.svg)
 ![WebSocket](https://img.shields.io/badge/WebSocket-Enabled-green.svg)
+![UTF-8](https://img.shields.io/badge/Encoding-UTF--8-brightgreen.svg)
 
 **Plateforme web complète pour gérer et animer la communauté des anciens élèves de SIGMA.**  
 Réseau professionnel, messagerie temps réel, événements, élections et souvenirs partagés.
@@ -48,20 +49,25 @@ SIGMA Alumni est une plateforme sociale dédiée aux anciens élèves permettant
 ### 🔐 Authentification & Sécurité
 - Inscription avec code de vérification
 - Connexion sécurisée (bcrypt + sessions PHP)
+- Toggle de visibilité du mot de passe (création compte & connexion)
 - Récupération de mot de passe par email
 - Protection CSRF et validation des entrées
+- Support complet UTF-8 pour tous les caractères (français, accents, apostrophes)
 
 ### 👤 Profils Enrichis
 - Profil personnalisable (photo, bio, études, promotion)
 - Recherche avancée avec filtres multiples
 - Annuaire dynamique (yearbook)
+- **Yearbook public** accessible sans connexion
 - Autocomplétion des utilisateurs
 
 ### 💬 Messagerie Temps Réel
 - WebSocket pour communication instantanée
 - Conversations privées 1-to-1
+- Tri automatique par conversation la plus récente
 - Indicateurs de messages non lus
 - Suppression automatique des anciens messages
+- Navigation contextuelle (retour intelligent)
 - Système de notifications intégré
 
 ### 🔔 Notifications
@@ -77,8 +83,9 @@ SIGMA Alumni est une plateforme sociale dédiée aux anciens élèves permettant
 
 ### 📅 Gestion d'Événements
 - Création et publication d'événements
-- Affichage chronologique
+- Affichage chronologique (événements à venir et passés)
 - Upload d'images pour chaque événement
+- Système de rappels personnalisés
 - Interface d'administration complète
 
 ### 🗳️ Système Électoral
@@ -103,9 +110,11 @@ SIGMA Alumni est une plateforme sociale dédiée aux anciens élèves permettant
 ### 👨‍💼 Administration
 - Panneau d'administration sécurisé
 - Gestion des utilisateurs
-- Modération des contenus
-- Gestion des emails de masse
-- Système de signalement
+- Modération des contenus (actualités, événements, élections)
+- Gestion complète des règlements, objectifs et valeurs
+- Gestion des emails de masse avec logo intégré
+- Système de signalement et suggestions
+- Affichage correct des caractères spéciaux dans toutes les interfaces
 
 ---
 
@@ -232,7 +241,8 @@ Sigma-Website/
 │
 ├── Pages principales
 │   ├── dashboard.php          # Tableau de bord
-│   ├── yearbook.php           # Annuaire des membres
+│   ├── yearbook.php           # Annuaire des membres (authentifié)
+│   ├── yearbook_public.php    # Annuaire public (sans connexion)
 │   ├── messaging.php          # Messagerie
 │   ├── notifications.php      # Centre de notifications
 │   ├── evenements.php         # Événements
@@ -475,6 +485,12 @@ Merci à tous les contributeurs et membres de l'association SIGMA Alumni qui fon
 
 ---
 
-**Version actuelle** : 2.0.0  
-**Dernière mise à jour** : 27 Décembre 2024  
+**Version actuelle** : 2.1.0  
+**Dernière mise à jour** : 3 Janvier 2026  
+**Nouveautés v2.1.0** :
+- ✅ Yearbook public accessible sans connexion
+- ✅ Support complet UTF-8 (accents, apostrophes, caractères spéciaux)
+- ✅ Toggle de visibilité du mot de passe
+- ✅ Amélioration de la navigation et des filtres
+
 **Site web** : https://sigma-alumni.org

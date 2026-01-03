@@ -79,6 +79,7 @@ try {
         $admin_mail->Password = SMTP_PASSWORD;
         $admin_mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $admin_mail->Port = SMTP_PORT;
+        $admin_mail->CharSet = 'UTF-8';
 
         // Recipients
         $admin_mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);

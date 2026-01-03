@@ -262,7 +262,7 @@ $member_count = $result->fetch_assoc()['member_count'];
     <section class="dashboard-hero">
         <div>
             <h1>Bienvenue sur votre espace membre</h1>
-            <div class="user-welcome"><?php echo htmlspecialchars($welcome_message); ?></div>
+            <div class="user-welcome"><?php echo $welcome_message; ?></div>
         </div>
     </section>
 

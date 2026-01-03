@@ -99,7 +99,7 @@ function sendVoteConfirmationEmail($user_id, $election_title, $positions) {
     
     $positions_list = implode(', ', $positions);
     
-    $subject = "Confirmation de votre vote - " . htmlspecialchars($election_title);
+    $subject = "Confirmation de votre vote - " . $election_title;
     
     $body = "
     <!DOCTYPE html>
@@ -124,13 +124,13 @@ function sendVoteConfirmationEmail($user_id, $election_title, $positions) {
                 <h1>Vote Enregistré avec Succès</h1>
             </div>
             <div class='content'>
-                <p>Bonjour <strong>" . htmlspecialchars($user['full_name']) . "</strong>,</p>
+                <p>Bonjour <strong>" . $user['full_name'] . "</strong>,</p>
                 
-                <p>Nous vous confirmons que votre vote pour l'élection <strong>" . htmlspecialchars($election_title) . "</strong> a été enregistré avec succès.</p>
+                <p>Nous vous confirmons que votre vote pour l'élection <strong>" . $election_title . "</strong> a été enregistré avec succès.</p>
                 
                 <div class='info-box'>
                     <h3>📊 Détails de votre participation</h3>
-                    <p><strong>Positions votées :</strong><br>" . htmlspecialchars($positions_list) . "</p>
+                    <p><strong>Positions votées :</strong><br>" . $positions_list . "</p>
                     <p><strong>Date et heure :</strong> " . date('d/m/Y à H:i') . "</p>
                 </div>
                 
@@ -208,7 +208,7 @@ function sendResultsNotificationEmails($election_id) {
     $stmt->execute();
     $result = $stmt->get_result();
     
-    $subject = "Résultats disponibles - " . htmlspecialchars($election['title']);
+    $subject = "Résultats disponibles - " . $election['title'];
     
     $sent_count = 0;
     $failed_count = 0;
@@ -242,9 +242,9 @@ function sendResultsNotificationEmails($election_id) {
                     <h1>Résultats de l'Élection Disponibles</h1>
                 </div>
                 <div class='content'>
-                    <p>Bonjour <strong>" . htmlspecialchars($user['full_name']) . "</strong>,</p>
+                    <p>Bonjour <strong>" . $user['full_name'] . "</strong>,</p>
                     
-                    <p>Les résultats de l'élection <strong>" . htmlspecialchars($election['title']) . "</strong> sont maintenant disponibles !</p>
+                    <p>Les résultats de l'élection <strong>" . $election['title'] . "</strong> sont maintenant disponibles !</p>
                     
                     <p>Vous pouvez consulter les résultats complets, incluant la répartition des votes par position et les candidats élus.</p>
                     

@@ -14,6 +14,13 @@ unset($_SESSION['success'], $_SESSION['error']);
 $csrf_token = bin2hex(random_bytes(32));
 $_SESSION['csrf_token'] = $csrf_token;
 
+// Capturer la page de référence si fournie
+$return_page = isset($_GET['from']) ? $_GET['from'] : 'settings.php';
+$allowed_pages = ['dashboard.php', 'settings.php', 'yearbook.php', 'accueil.php'];
+if (!in_array($return_page, $allowed_pages)) {
+    $return_page = 'settings.php';
+}
+
 // Fetch user data
 $stmt = $conn->prepare("SELECT full_name, birth_date, bac_year, studies, profile_picture, profession, company, city, country, interests FROM users WHERE email = ?");
 $stmt->bind_param("s", $user_email);
@@ -338,7 +345,7 @@ $default_image = 'img/profile_pic.jpeg';
 </head>
 <body>
     <div class="profile-container">
-        <a href="settings.php" class="back-arrow" aria-label="Retour aux paramètres">
+        <a href="<?php echo htmlspecialchars($return_page); ?>" class="back-arrow" aria-label="Retour">
             <i class="fas fa-arrow-left"></i>
         </a>
         
@@ -456,6 +463,14 @@ $default_image = 'img/profile_pic.jpeg';
                     <div class="input-icon">
                         <i class="fas fa-heart"></i>
                         <textarea id="interests" name="interests" class="form-control" placeholder="Vos passions et centres d'intérêt" rows="3"><?php echo htmlspecialchars($user['interests'] ?? ''); ?></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="linkedin_url">Lien LinkedIn (facultatif)</label>
+                    <div class="input-icon">
+                        <i class="fab fa-linkedin"></i>
+                        <input type="url" id="linkedin_url" name="linkedin_url" class="form-control" placeholder="https://www.linkedin.com/in/votre-profil" value="<?php echo htmlspecialchars($user['linkedin_url'] ?? ''); ?>">
                     </div>
                 </div>
                 

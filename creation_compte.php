@@ -58,7 +58,33 @@
             box-sizing: border-box;
         }
         input[type="password"] {
+            margin-bottom: 0;
+        }
+        .password-wrapper {
+            position: relative;
             margin-bottom: 20px;
+            width: 100%;
+        }
+        .password-wrapper input {
+            width: 100%;
+            padding: 10px 45px 10px 10px;
+            margin-bottom: 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s;
+            z-index: 10;
+        }
+        .toggle-password:hover {
+            color: #1e3a8a;
         }
         button {
             width: 100%;
@@ -89,12 +115,30 @@
             <?php if (isset($_SESSION['error']) && $_SESSION['error'] === "Email déjà utilisé.") { ?>
                 <p style="color: red;"><?php echo $_SESSION['error']; ?></p>
             <?php } ?>
-            <input type="password" name="password" placeholder="Mot de passe" required>
+            <div class="password-wrapper">
+                <input type="password" id="password" name="password" placeholder="Mot de passe" required>
+                <i class="fas fa-eye toggle-password" onclick="togglePassword('password', this)"></i>
+            </div>
             <?php if (isset($_SESSION['error']) && $_SESSION['error'] !== "Email déjà utilisé.") { ?>
                 <p style="color: red;"><?php echo $_SESSION['error']; ?></p>
             <?php } ?>
             <button type="submit">Créer mon compte</button>
         </form>
     </div>
+    
+    <script>
+        function togglePassword(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
 </body>
 </html>

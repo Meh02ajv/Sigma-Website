@@ -376,8 +376,8 @@ $unread_count = $notif->getUnreadCount($user_id);
                             <i class="fas fa-<?php echo $notif['icon']; ?>"></i>
                         </div>
                         <div class="notification-content">
-                            <div class="notification-title"><?php echo htmlspecialchars($notif['title']); ?></div>
-                            <div class="notification-message"><?php echo htmlspecialchars($notif['message']); ?></div>
+                            <div class="notification-title"><?php echo $notif['title']; ?></div>
+                            <div class="notification-message"><?php echo $notif['message']; ?></div>
                             <div class="notification-time">
                                 <?php 
                                 $time = strtotime($notif['created_at']);

@@ -15,6 +15,7 @@ if (!isset($configs)) {
 // Default values
 $instagram_url = $configs['instagram_url'] ?? 'https://instagram.com/sigmaofficial';
 $tiktok_url = $configs['tiktok_url'] ?? 'https://tiktok.com/@sigmaofficial';
+$linkedin_url = $configs['linkedin_url'] ?? 'https://linkedin.com/company/sigma-alumni';
 $contact_email = $configs['contact_email'] ?? 'contact@sigma-alumni.org';
 $contact_phone = $configs['contact_phone'] ?? '+33 1 23 45 67 89';
 $contact_address = $configs['contact_address'] ?? '123 Rue de l\'Éducation, 75001 Paris, France';
@@ -53,13 +54,10 @@ $current_year = date('Y');
                     <p>Unissant science, conscience et méthode depuis 1985</p>
                 </div>
                 <div class="social-links">
-                    <a href="<?php echo htmlspecialchars($instagram_url); ?>" target="_blank" rel="noopener" aria-label="Instagram">
-                        <i class="fab fa-instagram"></i>
+                    <a href="<?php echo htmlspecialchars($linkedin_url); ?>" target="_blank" rel="noopener" aria-label="LinkedIn">
+                        <i class="fab fa-linkedin"></i>
                     </a>
-                    <a href="<?php echo htmlspecialchars($tiktok_url); ?>" target="_blank" rel="noopener" aria-label="TikTok">
-                        <i class="fab fa-tiktok"></i>
-                    </a>
-                    <a href="mailto:<?php echo htmlspecialchars($contact_email); ?>" aria-label="Email">
+                    <a href="mailto:<?php echo $contact_email; ?>" aria-label="Email">
                         <i class="fas fa-envelope"></i>
                     </a>
                 </div>
@@ -81,7 +79,7 @@ $current_year = date('Y');
                 <h4>Ressources</h4>
                 <ul>
                     <li><a href="reglement.php"><i class="fas fa-file-alt"></i> Règlement</a></li>
-                    <li><a href="annuaire.php"><i class="fas fa-address-book"></i> Annuaire</a></li>
+                    <li><a href="connexion.php?redirect=annuaire"><i class="fas fa-address-book"></i> Annuaire</a></li>
                     <li><a href="objectifs.php"><i class="fas fa-bullseye"></i> Objectifs</a></li>
                     <li><a href="elections.php"><i class="fas fa-vote-yea"></i> Élections</a></li>
                 </ul>
@@ -93,19 +91,19 @@ $current_year = date('Y');
                 <div class="contact-items">
                     <div class="contact-item">
                         <i class="fas fa-envelope"></i>
-                        <a href="mailto:<?php echo htmlspecialchars($contact_email); ?>">
-                            <?php echo htmlspecialchars($contact_email); ?>
+                        <a href="mailto:<?php echo $contact_email; ?>">
+                            <?php echo $contact_email; ?>
                         </a>
                     </div>
                     <div class="contact-item">
                         <i class="fas fa-phone"></i>
                         <a href="tel:<?php echo preg_replace('/[^0-9+]/', '', $contact_phone); ?>">
-                            <?php echo htmlspecialchars($contact_phone); ?>
+                            <?php echo $contact_phone; ?>
                         </a>
                     </div>
                     <div class="contact-item">
                         <i class="fas fa-map-marker-alt"></i>
-                        <span><?php echo htmlspecialchars($contact_address); ?></span>
+                        <span><?php echo strip_tags($contact_address); ?></span>
                     </div>
                 </div>
             </div>

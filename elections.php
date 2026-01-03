@@ -596,8 +596,8 @@ $full_name = $user_info['full_name'] ?? 'Utilisateur';
             <div class="<?php echo $show_results ? 'completed-election' : ($results_processing ? 'processing-election' : 'bg-gradient-to-r from-blue-600 to-blue-800'); ?> text-white rounded-xl p-6 mb-8 shadow-lg">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
                     <div>
-                        <h2 class="text-2xl font-bold mb-2"><?php echo htmlspecialchars($election['title']); ?></h2>
-                        <p class="mb-4 opacity-90"><?php echo htmlspecialchars($election['description'] ?? 'Élection des membres du bureau'); ?></p>
+                        <h2 class="text-2xl font-bold mb-2"><?php echo $election['title']; ?></h2>
+                        <p class="mb-4 opacity-90"><?php echo $election['description'] ?? 'Élection des membres du bureau'; ?></p>
                         
                         <!-- Timeline de l'élection -->
                         <div class="mb-4">
@@ -715,7 +715,7 @@ $full_name = $user_info['full_name'] ?? 'Utilisateur';
                                             <div class="text-sm text-gray-500"><?php echo htmlspecialchars($candidate['studies'] ?? 'Non spécifié'); ?></div>
                                         </div>
                                     </div>
-                                    <p class="text-gray-600 mb-4 line-clamp-3"><?php echo htmlspecialchars($candidate['description'] ?? 'Aucune description fournie'); ?></p>
+                                    <p class="text-gray-600 mb-4 line-clamp-3"><?php echo $candidate['description'] ?? 'Aucune description fournie'; ?></p>
                                     <div class="flex space-x-2">
                                         <?php if ($candidate['video_url']): ?>
                                             <button onclick="openVideoModal('<?php echo htmlspecialchars($candidate['video_url']); ?>')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition flex items-center justify-center">
@@ -1023,7 +1023,7 @@ $full_name = $user_info['full_name'] ?? 'Utilisateur';
                                                             alt="Gagnant" class="h-12 w-12 border-2 border-yellow-400">
                                                     </div>
                                                     <div>
-                                                        <div class="font-medium"><?php echo htmlspecialchars($winner['name']); ?></div>
+                                                        <div class="font-medium"><?php echo $winner['name']; ?></div>
                                                         <div class="text-sm text-gray-500">
                                                             <?php echo htmlspecialchars($winner['percentage']); ?>% des votes
                                                             (<?php echo $winner['votes']; ?> vote<?php echo $winner['votes'] > 1 ? 's' : ''; ?>)
@@ -1058,7 +1058,7 @@ $full_name = $user_info['full_name'] ?? 'Utilisateur';
                                                                 <i class="fas fa-ban text-sm"></i>
                                                             </div>
                                                         <?php endif; ?>
-                                                        <span><?php echo htmlspecialchars($result['name']); ?></span>
+                                                        <span><?php echo $result['name']; ?></span>
                                                     </div>
                                                     <div class="flex items-center space-x-4">
                                                         <div class="text-sm font-medium">

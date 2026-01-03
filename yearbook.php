@@ -50,7 +50,7 @@ if (!in_array($sort_by, $allowed_sort_columns)) {
 // Build SQL query with birthday check and advanced search
 $current_date = date('m-d');
 $query = "SELECT id, full_name, email, birth_date, studies, bac_year, profile_picture,
-          profession, company, city, country,
+          profession, company, city, country, linkedin_url, interests,
           CASE WHEN DATE_FORMAT(birth_date, '%m-%d') = ? THEN 1 ELSE 0 END AS is_birthday 
           FROM users WHERE 1=1";
 $params = [$current_date];
@@ -357,7 +357,7 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
         
         .main-content {
             max-width: 1200px;
-            margin: 0 auto;
+            margin: 2rem auto 0;
             padding: 0 2rem 2rem;
         }
         
@@ -644,16 +644,53 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
         
         /* NOUVEAU : Bouton de fermeture des filtres pour desktop */
         .close-filters-desktop {
-            display: none;
             position: absolute;
             top: 1rem;
             right: 1rem;
             font-size: 1.5rem;
-            background: none;
-            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ddd;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
             color: var(--dark-color);
             cursor: pointer;
             z-index: 2001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .close-filters-desktop:hover {
+            background: #f0f0f0;
+            color: var(--accent-color);
+            transform: rotate(90deg);
+        }
+        
+        .filters-container.hidden {
+            display: none;
+        }
+        
+        .show-filters-btn {
+            display: block;
+            margin: 1rem auto;
+            padding: 0.8rem 1.5rem;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .show-filters-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .show-filters-btn.hidden {
+            display: none;
         }
         
         /* Mobile interface */
@@ -680,6 +717,10 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
 
         /* Améliorations pour mobile */
         @media (max-width: 768px) {
+            .show-filters-btn {
+                display: none !important;
+            }
+            
             .logo-text {
                 font-size: 1.2rem;
             }
@@ -830,11 +871,15 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
         /* Desktop - Afficher le bouton de fermeture */
         @media (min-width: 769px) {
             .close-filters-desktop {
-                display: block;
+                display: flex;
             }
             
             .close-filters {
                 display: none;
+            }
+            
+            .filter-toggle {
+                display: none !important;
             }
         }
 
@@ -916,11 +961,7 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
         </div>
         <div class="nav-icons">
             <a href="album.php" aria-label="Album"><i class="fas fa-images"></i></a>
-            <a href="notifications.php" aria-label="Notifications" class="notification-icon">
-                <i class="fas fa-bell"></i>
-                <span class="unread-count" id="notifications-count"></span>
-            </a>
-            <a href="messaging.php" aria-label="Messagerie" class="message-icon">
+            <a href="messaging.php?from=yearbook.php" aria-label="Messagerie" class="message-icon">
                 <i class="fas fa-envelope"></i>
                 <span class="unread-count" id="unread-count"></span>
             </a>
@@ -934,6 +975,11 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
             <?php echo htmlspecialchars($success ?: $error); ?>
         </div>
     <?php endif; ?>
+    
+    <!-- Bouton pour afficher les filtres quand ils sont masqués -->
+    <button class="show-filters-btn hidden" id="showFiltersBtn">
+        <i class="fas fa-filter"></i> Afficher les filtres
+    </button>
     
     <!-- SUPPRIMÉ : Barre de recherche mobile -->
     
@@ -1044,6 +1090,7 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
                          data-city="<?php echo htmlspecialchars($user['city'] ?? ''); ?>"
                          data-country="<?php echo htmlspecialchars($user['country'] ?? ''); ?>"
                          data-interests="<?php echo htmlspecialchars($user['interests'] ?? ''); ?>"
+                         data-linkedin="<?php echo htmlspecialchars($user['linkedin_url'] ?? ''); ?>"
                          data-birthday="<?php echo $user['is_birthday'] ? 'true' : 'false'; ?>"
                          data-image="<?php echo $user['profile_picture'] ? htmlspecialchars($user['profile_picture']) : 'img/profile_pic.jpeg'; ?>">
                         <img src="<?php echo $user['profile_picture'] ? htmlspecialchars($user['profile_picture']) : 'img/profile_pic.jpeg'; ?>" alt="Photo de profil" class="profile-image">
@@ -1118,6 +1165,10 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
                         <div class="info-item" id="companyItem">
                             <span class="info-label"><i class="fas fa-building"></i> Entreprise</span>
                             <span class="info-value" id="modalProfileCompany"></span>
+                        </div>
+                        <div class="info-item" id="linkedinItem" style="display: none;">
+                            <span class="info-label"><i class="fab fa-linkedin"></i> LinkedIn</span>
+                            <a href="#" id="modalProfileLinkedIn" target="_blank" class="info-value" style="color: #0077b5; text-decoration: none;">Voir le profil</a>
                         </div>
                     </div>
                     
@@ -1374,6 +1425,7 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
             const city = element.dataset.city;
             const country = element.dataset.country;
             const interests = element.dataset.interests;
+            const linkedin = element.dataset.linkedin;
             const image = element.dataset.image;
 
             document.getElementById('modalProfileName').textContent = name;
@@ -1386,6 +1438,16 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
             // Afficher les informations professionnelles (toujours visibles)
             document.getElementById('modalProfileProfession').textContent = profession || 'Non spécifié';
             document.getElementById('modalProfileCompany').textContent = company || 'Non spécifié';
+            
+            // Afficher LinkedIn si disponible
+            const linkedinItem = document.getElementById('linkedinItem');
+            const linkedinLink = document.getElementById('modalProfileLinkedIn');
+            if (linkedin && linkedin.trim() !== '') {
+                linkedinLink.href = linkedin;
+                linkedinItem.style.display = 'block';
+            } else {
+                linkedinItem.style.display = 'none';
+            }
             
             // Afficher la localisation (toujours visible)
             if (city || country) {
@@ -1556,9 +1618,32 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
             
             // Gestion unique de la fermeture des filtres
             function closeFilterMenu() {
-                filtersContainer.classList.remove('active');
-                filterOverlay.classList.remove('active');
-                document.body.style.overflow = 'auto';
+                const isDesktop = window.innerWidth >= 769;
+                const showFiltersBtn = document.getElementById('showFiltersBtn');
+                if (isDesktop) {
+                    // Sur desktop, masquer complètement les filtres
+                    filtersContainer.classList.add('hidden');
+                    if (showFiltersBtn) showFiltersBtn.classList.remove('hidden');
+                } else {
+                    // Sur mobile, utiliser le comportement de slide
+                    filtersContainer.classList.remove('active');
+                    filterOverlay.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                }
+            }
+            
+            // Fonction pour afficher les filtres
+            function openFilterMenu() {
+                const isDesktop = window.innerWidth >= 769;
+                const showFiltersBtn = document.getElementById('showFiltersBtn');
+                if (isDesktop) {
+                    filtersContainer.classList.remove('hidden');
+                    if (showFiltersBtn) showFiltersBtn.classList.add('hidden');
+                } else {
+                    filtersContainer.classList.add('active');
+                    filterOverlay.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
             }
             
             // Écouteurs pour tous les boutons de fermeture
@@ -1566,10 +1651,20 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
             if (closeFiltersDesktop) closeFiltersDesktop.addEventListener('click', closeFilterMenu);
             if (filterOverlay) filterOverlay.addEventListener('click', closeFilterMenu);
             
+            if (filterToggle) {
+                filterToggle.addEventListener('click', openFilterMenu);
+            }
+            
+            // Bouton pour réafficher les filtres
+            const showFiltersBtn = document.getElementById('showFiltersBtn');
+            if (showFiltersBtn) {
+                showFiltersBtn.addEventListener('click', openFilterMenu);
+            }
+            
             if (applyFiltersBtn) {
                 applyFiltersBtn.addEventListener('click', () => {
                     reloadProfiles();
-                    closeFilterMenu();
+                    // Ne pas fermer les filtres après application
                 });
             }
         }

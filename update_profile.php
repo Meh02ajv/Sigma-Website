@@ -94,6 +94,7 @@ $company = isset($_POST['company']) ? htmlspecialchars(trim($_POST['company']), 
 $city = isset($_POST['city']) ? htmlspecialchars(trim($_POST['city']), ENT_QUOTES, 'UTF-8') : null;
 $country = isset($_POST['country']) ? htmlspecialchars(trim($_POST['country']), ENT_QUOTES, 'UTF-8') : null;
 $interests = isset($_POST['interests']) ? htmlspecialchars(trim($_POST['interests']), ENT_QUOTES, 'UTF-8') : null;
+$linkedin_url = isset($_POST['linkedin_url']) ? htmlspecialchars(trim($_POST['linkedin_url']), ENT_QUOTES, 'UTF-8') : null;
 
 // Validate required fields for other updates
 if (empty($full_name) || empty($birth_date) || empty($bac_year) || empty($studies)) {
@@ -202,9 +203,9 @@ if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] !==
 }
 
 // Build SQL update
-$update_fields = "full_name = ?, birth_date = ?, bac_year = ?, studies = ?, profession = ?, company = ?, city = ?, country = ?, interests = ?";
-$params = [$full_name, $birth_date, $bac_year, $studies, $profession, $company, $city, $country, $interests];
-$types = "ssissssss";
+$update_fields = "full_name = ?, birth_date = ?, bac_year = ?, studies = ?, profession = ?, company = ?, city = ?, country = ?, interests = ?, linkedin_url = ?";
+$params = [$full_name, $birth_date, $bac_year, $studies, $profession, $company, $city, $country, $interests, $linkedin_url];
+$types = "ssisssssss";
 
 if ($profile_picture !== null) {
     $update_fields .= ", profile_picture = ?";

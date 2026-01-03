@@ -44,7 +44,7 @@ if (isset($_GET['download_pdf'])) {
             <p>Ce règlement a pour objet de préciser les modalités de fonctionnement de l\'association SIGMA Alumni et de définir les droits et obligations de ses membres.</p>';
         foreach ($regulations as $regulation) {
             $html .= '
-                <h3>' . htmlspecialchars($regulation['title']) . '</h3>
+                <h3>' . $regulation['title'] . '</h3>
                 ' . $regulation['content'];
         }
         $html .= '<div style="text-align: center; font-style: italic;">' . $footer_content . '</div>';
@@ -239,7 +239,7 @@ if (isset($_GET['download_pdf'])) {
                 <div class="reglement-article">
                     <h3 class="article-title">
                         <span class="article-number"><?php echo htmlspecialchars($regulation['article_number']); ?></span>
-                        <?php echo htmlspecialchars($regulation['title']); ?>
+                        <?php echo $regulation['title']; ?>
                     </h3>
                     <div class="article-content">
                         <?php echo $regulation['content']; ?>

@@ -241,6 +241,10 @@ if ($user && !empty($user['full_name']) && !empty($user['birth_date']) && !empty
                 <input type="text" id="country" name="country" placeholder="Pays de résidence">
             </div>
             <div class="form-group">
+                <label for="linkedin_url"><i class="fab fa-linkedin"></i> Lien LinkedIn (facultatif)</label>
+                <input type="url" id="linkedin_url" name="linkedin_url" placeholder="https://www.linkedin.com/in/votre-profil">
+            </div>
+            <div class="form-group">
                 <label for="interests"><i class="fas fa-heart"></i> Centres d'intérêt</label>
                 <textarea id="interests" name="interests" placeholder="Vos centres d'intérêt (sport, musique, voyages...)" rows="3"></textarea>
             </div>

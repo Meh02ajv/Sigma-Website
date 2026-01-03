@@ -863,13 +863,13 @@ $user_full_name = isset($_SESSION['full_name']) ? htmlspecialchars($_SESSION['fu
                     
                     <?php if ($isLoggedIn): ?>
                         <li>
-                            <a href="messaging.php" <?php echo $current_page == 'messaging.php' ? 'class="active"' : ''; ?> id="messaging-nav-link" style="position: relative;">
+                            <a href="messaging.php?from=dashboard.php" <?php echo $current_page == 'messaging.php' ? 'class="active"' : ''; ?> id="messaging-nav-link" style="position: relative;">
                                 <i class="fas fa-comments"></i> <span>Messagerie</span>
                                 <span class="message-badge" id="message-badge" style="display: none;">0</span>
                             </a>
                         </li>
                         <li>
-                            <a href="mod_prof.php" <?php echo $current_page == 'profil.php' ? 'class="active"' : ''; ?>>
+                            <a href="mod_prof.php?from=dashboard.php" <?php echo $current_page == 'profil.php' ? 'class="active"' : ''; ?>>
                                 <i class="fas fa-user-circle"></i> <span>Profil</span>
                             </a>
                         </li>

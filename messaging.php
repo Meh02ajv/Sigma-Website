@@ -23,10 +23,28 @@ if (!$current_user) {
 // Initialize users array to avoid undefined variable error
 $users = [];
 
-// Fetch all users except the current user
-$stmt = $conn->prepare("SELECT id, full_name, email, profile_picture FROM users WHERE email != ? ORDER BY full_name");
+// Capturer la page de référence si fournie
+$return_page = isset($_GET['from']) ? $_GET['from'] : 'yearbook.php';
+$allowed_pages = ['dashboard.php', 'yearbook.php', 'mod_prof.php', 'accueil.php'];
+if (!in_array($return_page, $allowed_pages)) {
+    $return_page = 'yearbook.php';
+}
+
+// Fetch all users except the current user, ordered by last message date
+$stmt = $conn->prepare("
+    SELECT DISTINCT u.id, u.full_name, u.email, u.profile_picture,
+           MAX(d.sent_at) as last_message_time
+    FROM users u
+    LEFT JOIN discussion d ON (
+        (d.sender_id = ? AND d.recipient_id = u.id) OR 
+        (d.sender_id = u.id AND d.recipient_id = ?)
+    )
+    WHERE u.email != ?
+    GROUP BY u.id, u.full_name, u.email, u.profile_picture
+    ORDER BY MAX(d.sent_at) IS NULL, MAX(d.sent_at) DESC, u.full_name
+");
 if ($stmt) {
-    $stmt->bind_param("s", $user_email);
+    $stmt->bind_param("iis", $current_user['id'], $current_user['id'], $user_email);
     $stmt->execute();
     $result = $stmt->get_result();
     $users = $result->fetch_all(MYSQLI_ASSOC);
@@ -198,6 +216,19 @@ $default_profile_picture = 'img/profile_pic.jpeg';
             position: relative;
             border-bottom: 1px solid var(--border-color);
         }
+        .user-card.moving-to-top {
+            animation: slideToTop 0.5s ease-out;
+        }
+        @keyframes slideToTop {
+            0% {
+                opacity: 0.7;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
         .user-card:hover {
             background-color: var(--highlight-color);
         }
@@ -272,6 +303,26 @@ $default_profile_picture = 'img/profile_pic.jpeg';
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+        .user-card .info .last-message {
+            font-size: 12px;
+            color: var(--text-light);
+            font-style: italic;
+            margin-top: 2px;
+        }
+        .user-card.unread .info .last-message {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        .user-card .info .last-message {
+            font-size: 12px;
+            color: var(--text-light);
+            font-style: italic;
+            margin-top: 2px;
+        }
+        .user-card.unread .info .last-message {
+            color: var(--primary-color);
+            font-weight: 500;
         }
         .user-card.unread .info h3 {
             font-weight: 600;
@@ -386,6 +437,7 @@ $default_profile_picture = 'img/profile_pic.jpeg';
             align-items: flex-end;
             gap: 12px;
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            position: relative;
         }
         .chat-input textarea {
             flex: 1;
@@ -438,6 +490,21 @@ $default_profile_picture = 'img/profile_pic.jpeg';
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
+        }
+        .char-counter {
+            position: absolute;
+            bottom: 12px;
+            right: 70px;
+            font-size: 11px;
+            color: var(--text-light);
+            background: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            pointer-events: none;
+        }
+        .char-counter.warning {
+            color: var(--error-color);
+            font-weight: 600;
         }
         .no-selection, .error-message, .info-message {
             display: flex;
@@ -786,10 +853,15 @@ $default_profile_picture = 'img/profile_pic.jpeg';
         
         /* Indicateur de saisie */
         .typing-indicator {
-            display: none;
             padding: 8px 12px;
             margin-bottom: 10px;
             max-width: 70px;
+            background: var(--bg-light);
+            border-radius: 18px;
+            width: fit-content;
+        }
+        .typing-indicator.hidden {
+            display: none;
         }
         
         .typing-indicator span {
@@ -880,7 +952,7 @@ $default_profile_picture = 'img/profile_pic.jpeg';
 <body data-user-id="<?php echo $current_user['id']; ?>" data-csrf-token="<?php echo $csrf_token; ?>">
     <header>
         <div class="left-icons">
-            <a href="yearbook.php" aria-label="Aller au Yearbook"><i class="fas fa-users"></i></a>
+            <a href="<?php echo htmlspecialchars($return_page); ?>" aria-label="Retour"><i class="fas fa-arrow-left"></i></a>
         </div>
         <div class="center-title">
             <img src="img/image.png" alt="Logo" class="logo">
@@ -928,6 +1000,11 @@ $default_profile_picture = 'img/profile_pic.jpeg';
                 <div class="no-selection">
                     <i class="fas fa-comments"></i>
                     <p>Sélectionnez un contact pour commencer la conversation</p>
+                </div>
+                <div class="typing-indicator hidden" id="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
                 </div>
             </div>
             <div class="chat-input hidden" id="chat-input">

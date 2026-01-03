@@ -5,6 +5,11 @@ require 'vendor/autoload.php'; // Replace with manual includes if not using Comp
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+// Sanitization function
+function sanitize($data) {
+    return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES, 'UTF-8');
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Sanitize and validate email
     $email = sanitize($_POST['email']);
@@ -56,20 +61,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $mail->Password = SMTP_PASSWORD;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = SMTP_PORT;
+        $mail->CharSet = 'UTF-8';
 
         // Recipients
         $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
         $mail->addAddress($email, $full_name);
         $mail->addReplyTo(SMTP_REPLY_TO_EMAIL, SMTP_REPLY_TO_NAME);
+        
+        // Attacher le logo
+        $logo_path = __DIR__ . '/img/image.png';
+        if (file_exists($logo_path)) {
+            $mail->addEmbeddedImage($logo_path, 'logo', 'logo.png');
+        }
 
         // Content
         $mail->isHTML(true);
         $mail->Subject = 'Réinitialisation de votre mot de passe';
         $mail->Body = "
             <html>
+            <head><meta charset='UTF-8'></head>
             <body style='font-family: Arial, sans-serif;'>
                 <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
-                    <img src='img/image.png' alt='Sigma Logo' style='width: 100px;'>
+                    <img src='cid:logo' alt='Sigma Logo' style='width: 100px;'>
                     <h2 style='color: #1e3a8a;'>Bonjour $full_name,</h2>
                     <p>Vous avez demandé à réinitialiser votre mot de passe. Cliquez sur le lien ci-dessous pour procéder :</p>
                     <p><a href='$reset_link' style='color: #1e3a8a; text-decoration: underline;'>Réinitialiser mon mot de passe</a></p>

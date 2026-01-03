@@ -41,13 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_general_config
         if (isset($_POST[$field])) {
             $value = trim($_POST[$field]);
             
-            // Pour contact_address, wrapper automatiquement en <p> si pas de balises HTML
-            if ($field === 'contact_address' && !preg_match('/<[^>]+>/', $value)) {
-                // Convertir les retours à la ligne en <br> puis wrapper en <p>
-                $value = '<p>' . nl2br(htmlspecialchars($value, ENT_QUOTES, 'UTF-8')) . '</p>';
-            } else {
-                $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-            }
+            // Sauvegarder le texte brut sans encodage HTML
+            // Les balises <p> et <br> ne sont plus ajoutées automatiquement
             
             $stmt = $conn->prepare("INSERT INTO general_config (setting_key, setting_value, setting_type) VALUES (?, ?, 'text') ON DUPLICATE KEY UPDATE setting_value = ?");
             $stmt->bind_param("sss", $field, $value, $value);
@@ -3290,7 +3285,7 @@ $stmt->close();
                                                 <span class="text-gray-400">Aucune image</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td class="p-3"><?php echo htmlspecialchars($event['title']); ?></td>
+                                        <td class="p-3"><?php echo $event['title']; ?></td>
                                         <td class="p-3"><?php echo date('d/m/Y H:i', strtotime($event['event_date'])); ?></td>
                                         <td class="p-3"><?php echo htmlspecialchars($event['location']); ?></td>
                                         <td class="p-3">
@@ -3384,8 +3379,8 @@ $stmt->close();
                                                 <span class="text-gray-400">Aucune image</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td class="p-3"><?php echo htmlspecialchars($news_item['title']); ?></td>
-                                        <td class="p-3"><?php echo htmlspecialchars(substr($news_item['excerpt'], 0, 50)) . (strlen($news_item['excerpt']) > 50 ? '...' : ''); ?></td>
+                                        <td class="p-3"><?php echo $news_item['title']; ?></td>
+                                        <td class="p-3"><?php echo substr($news_item['excerpt'], 0, 50) . (strlen($news_item['excerpt']) > 50 ? '...' : ''); ?></td>
                                         <td class="p-3"><?php echo date('d/m/Y H:i', strtotime($news_item['created_at'])); ?></td>
                                         <td class="p-3">
                                             <form method="POST" class="inline">
@@ -3460,7 +3455,7 @@ $stmt->close();
                                     
                                     <div class="form-group">
                                         <label class="form-label">Horaires *</label>
-                                        <textarea name="hours" id="hours" class="form-input form-textarea" rows="3" required><?php echo htmlspecialchars($contact_info['hours']); ?></textarea>
+                                        <textarea name="hours" id="hours" class="form-input form-textarea" rows="3" required><?php echo $contact_info['hours']; ?></textarea>
                                         <p class="text-sm text-gray-500 mt-1">Ex: Lundi - Vendredi : 9h - 18h</p>
                                     </div>
                                 </div>
@@ -3469,7 +3464,7 @@ $stmt->close();
                             <!-- Adresse -->
                             <div class="form-group mb-6">
                                 <label class="form-label">Adresse complète *</label>
-                                <textarea name="address" id="address" class="form-input form-textarea" rows="3" required><?php echo htmlspecialchars($contact_info['address']); ?></textarea>
+                                <textarea name="address" id="address" class="form-input form-textarea" rows="3" required><?php echo $contact_info['address']; ?></textarea>
                             </div>
 
                             <!-- Réseaux sociaux -->
@@ -3498,7 +3493,7 @@ $stmt->close();
                             <!-- Carte -->
                             <div class="form-group">
                                 <label class="form-label">Code iframe Google Maps *</label>
-                                <textarea name="map_iframe" id="map_iframe" class="form-input form-textarea" rows="4" required><?php echo htmlspecialchars($contact_info['map_iframe']); ?></textarea>
+                                <textarea name="map_iframe" id="map_iframe" class="form-input form-textarea" rows="4" required><?php echo $contact_info['map_iframe']; ?></textarea>
                                 <p class="text-sm text-gray-500 mt-1">
                                     <a href="https://www.google.com/maps" target="_blank" class="text-blue-600 hover:underline">
                                         Obtenir le code iframe depuis Google Maps
@@ -3547,7 +3542,7 @@ $stmt->close();
                                                         <?php echo date('H:i', strtotime($submission['created_at'])); ?>
                                                     </div>
                                                 </td>
-                                                <td class="font-medium"><?php echo htmlspecialchars($submission['name']); ?></td>
+                                                <td class="font-medium"><?php echo $submission['name']; ?></td>
                                                 <td>
                                                     <a href="mailto:<?php echo htmlspecialchars($submission['email']); ?>" class="text-blue-600 hover:underline text-sm">
                                                         <?php echo htmlspecialchars($submission['email']); ?>
@@ -3631,11 +3626,11 @@ $stmt->close();
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium mb-1">URL Instagram</label>
-                                    <input type="url" name="instagram_url" value="<?php echo htmlspecialchars($general_config['instagram_url']); ?>" class="form-input" placeholder="https://instagram.com/votre-compte">
+                                    <input type="url" name="instagram_url" value="<?php echo $general_config['instagram_url']; ?>" class="form-input" placeholder="https://instagram.com/votre-compte">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium mb-1">URL TikTok</label>
-                                    <input type="url" name="tiktok_url" value="<?php echo htmlspecialchars($general_config['tiktok_url']); ?>" class="form-input" placeholder="https://tiktok.com/@votre-compte">
+                                    <input type="url" name="tiktok_url" value="<?php echo $general_config['tiktok_url']; ?>" class="form-input" placeholder="https://tiktok.com/@votre-compte">
                                 </div>
                             </div>
                         </div>
@@ -3646,11 +3641,11 @@ $stmt->close();
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium mb-1">Email de contact</label>
-                                    <input type="email" name="contact_email" value="<?php echo htmlspecialchars($general_config['contact_email']); ?>" class="form-input" required>
+                                    <input type="email" name="contact_email" value="<?php echo $general_config['contact_email']; ?>" class="form-input" required>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium mb-1">Téléphone</label>
-                                    <input type="text" name="contact_phone" value="<?php echo htmlspecialchars($general_config['contact_phone']); ?>" class="form-input" required>
+                                    <input type="text" name="contact_phone" value="<?php echo $general_config['contact_phone']; ?>" class="form-input" required>
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-medium mb-1">Adresse</label>
@@ -3661,7 +3656,7 @@ $stmt->close();
                                         $address = str_replace(['<br>', '<br/>', '<br />'], "\n", $address);
                                         // Enlever les balises <p> et </p>
                                         $address = strip_tags($address);
-                                        echo htmlspecialchars($address);
+                                        echo $address;
                                     ?></textarea>
                                     <p class="text-xs text-gray-500 mt-1">
                                         <i class="fas fa-info-circle"></i> Entrez simplement le texte, il sera automatiquement formaté en HTML
@@ -3826,7 +3821,7 @@ $stmt->close();
                     <form method="POST" class="mb-8">
                         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                         <div class="mb-4">
-                            <textarea name="footer_content" class="form-input" rows="4" required><?php echo htmlspecialchars($regulation_footer); ?></textarea>
+                            <textarea name="footer_content" class="form-input" rows="4" required><?php echo $regulation_footer; ?></textarea>
                         </div>
                         <button type="submit" name="update_regulation_footer" class="btn-primary">Mettre à jour le pied de page</button>
                     </form>
@@ -3848,7 +3843,7 @@ $stmt->close();
                                 <?php foreach ($regulations as $regulation): ?>
                                     <tr class="border-b">
                                         <td class="p-3"><?php echo htmlspecialchars($regulation['article_number']); ?></td>
-                                        <td class="p-3"><?php echo htmlspecialchars($regulation['title']); ?></td>
+                                        <td class="p-3"><?php echo $regulation['title']; ?></td>
                                         <td class="p-3"><?php echo htmlspecialchars(substr(strip_tags($regulation['content']), 0, 50)) . (strlen($regulation['content']) > 50 ? '...' : ''); ?></td>
                                         <td class="p-3"><?php echo htmlspecialchars($regulation['order_index']); ?></td>
                                         <td class="p-3">
@@ -3888,7 +3883,7 @@ $stmt->close();
                             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                             <div class="form-group">
                                 <label class="form-label">Description de la mission *</label>
-                                <textarea name="mission_content" id="mission_content" class="form-input form-textarea" rows="6" required><?php echo htmlspecialchars($mission_content); ?></textarea>
+                                <textarea name="mission_content" id="mission_content" class="form-input form-textarea" rows="6" required><?php echo $mission_content; ?></textarea>
                                 <p class="text-sm text-gray-500 mt-1">Décrivez la mission principale de votre association</p>
                             </div>
                             <button type="submit" name="update_mission" class="btn btn-primary">
@@ -3967,7 +3962,7 @@ $stmt->close();
                                                 <td class="text-center">
                                                     <i class="<?php echo htmlspecialchars($objectif['icon']); ?> text-blue-600 text-lg"></i>
                                                 </td>
-                                                <td class="font-medium"><?php echo htmlspecialchars($objectif['title']); ?></td>
+                                                <td class="font-medium"><?php echo $objectif['title']; ?></td>
                                                 <td>
                                                     <div class="max-w-xs truncate" title="<?php echo htmlspecialchars(strip_tags($objectif['description'])); ?>">
                                                         <?php echo htmlspecialchars(substr(strip_tags($objectif['description']), 0, 80)); ?>
@@ -4076,7 +4071,7 @@ $stmt->close();
                                                 <td class="text-center">
                                                     <i class="<?php echo htmlspecialchars($value['icon']); ?> text-purple-600 text-lg"></i>
                                                 </td>
-                                                <td class="font-medium"><?php echo htmlspecialchars($value['title']); ?></td>
+                                                <td class="font-medium"><?php echo $value['title']; ?></td>
                                                 <td>
                                                     <div class="max-w-xs truncate" title="<?php echo htmlspecialchars(strip_tags($value['description'])); ?>">
                                                         <?php echo htmlspecialchars(substr(strip_tags($value['description']), 0, 80)); ?>
@@ -4163,7 +4158,7 @@ $stmt->close();
                             <tbody>
                                 <?php foreach ($elections as $election): ?>
                                     <tr class="border-b">
-                                        <td class="p-3"><?php echo htmlspecialchars($election['title']); ?></td>
+                                        <td class="p-3"><?php echo $election['title']; ?></td>
                                         <td class="p-3"><?php echo date('d/m/Y H:i', strtotime($election['start_date'])); ?></td>
                                         <td class="p-3"><?php echo date('d/m/Y H:i', strtotime($election['end_date'])); ?></td>
                                         <td class="p-3">
@@ -4235,7 +4230,7 @@ $stmt->close();
                             <select name="election_id" class="form-input" required>
                                 <option value="">Sélectionner une élection</option>
                                 <?php foreach ($elections as $election): ?>
-                                    <option value="<?php echo $election['id']; ?>"><?php echo htmlspecialchars($election['title']); ?></option>
+                                    <option value="<?php echo $election['id']; ?>"><?php echo $election['title']; ?></option>
                                 <?php endforeach; ?>
                             </select>
                             <select name="user_id" class="form-input" required>
@@ -4292,7 +4287,7 @@ $stmt->close();
                     <?php foreach ($elections as $election): ?>
                         <div class="mb-8 border rounded-lg p-6 bg-white shadow-sm">
                             <div class="flex justify-between items-start mb-4">
-                                <h3 class="text-xl font-semibold text-gray-800"><?php echo htmlspecialchars($election['title']); ?></h3>
+                                <h3 class="text-xl font-semibold text-gray-800"><?php echo $election['title']; ?></h3>
                                 <div class="text-right">
                                     <div class="text-sm text-gray-600">Statut: 
                                         <span class="font-medium <?php 
@@ -4402,7 +4397,7 @@ $stmt->close();
                                                                     <?php endif; ?>
                                                                     <div>
                                                                         <span class="font-medium <?php echo $index === 0 && !$result['is_blank'] ? 'text-green-700' : 'text-gray-700'; ?>">
-                                                                            <?php echo htmlspecialchars($result['name']); ?>
+                                                                            <?php echo $result['name']; ?>
                                                                         </span>
                                                                         <?php if ($index === 0 && !$result['is_blank']): ?>
                                                                             <span class="ml-2 bg-green-600 text-white px-2 py-0.5 rounded text-xs font-medium">Élu(e)</span>

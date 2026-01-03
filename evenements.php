@@ -221,18 +221,18 @@ $stmt->close();
                     <div class="event-card">
                         <div class="event-image">
                             <?php if ($event['image_path']): ?>
-                                <img src="<?php echo htmlspecialchars($event['image_path']); ?>" alt="<?php echo htmlspecialchars($event['title']); ?>">
+                                <img src="<?php echo htmlspecialchars($event['image_path']); ?>" alt="<?php echo $event['title']; ?>">
                             <?php else: ?>
                                 <img src="images/event-default.jpg" alt="Événement SIGMA Alumni">
                             <?php endif; ?>
                         </div>
                         <div class="event-details">
                             <span class="event-date"><?php echo date('d M Y', strtotime($event['event_date'])); ?></span>
-                            <h3 class="event-title"><?php echo htmlspecialchars($event['title']); ?></h3>
-                            <p class="event-description"><?php echo htmlspecialchars($event['description']); ?></p>
+                            <h3 class="event-title"><?php echo $event['title']; ?></h3>
+                            <p class="event-description"><?php echo $event['description']; ?></p>
                             <div class="event-meta">
                                 <div><i class="fas fa-clock"></i> <?php echo date('H:i', strtotime($event['event_date'])); ?></div>
-                                <div><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($event['location']); ?></div>
+                                <div><i class="fas fa-map-marker-alt"></i> <?php echo $event['location']; ?></div>
                             </div>
                         </div>
                     </div>
@@ -260,7 +260,7 @@ $stmt->close();
                         <div class="event-details">
                             <span class="event-date"><?php echo date('d M Y', strtotime($event['event_date'])); ?></span>
                             <h3 class="event-title"><?php echo htmlspecialchars($event['title']); ?></h3>
-                            <p class="event-description"><?php echo htmlspecialchars($event['description']); ?></p>
+                            <p class="event-description"><?php echo nl2br($event['description']); ?></p>
                             <div class="event-meta">
                                 <div><i class="fas fa-clock"></i> <?php echo date('H:i', strtotime($event['event_date'])); ?></div>
                                 <div><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($event['location']); ?></div>
