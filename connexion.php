@@ -1,6 +1,21 @@
 <?php
 require 'config.php';
 
+// Récupérer la configuration générale
+$stmt_config = $conn->prepare("SELECT setting_key, setting_value FROM general_config");
+$stmt_config->execute();
+$result_config = $stmt_config->get_result();
+$general_config = [];
+while ($row = $result_config->fetch_assoc()) {
+    $general_config[$row['setting_key']] = $row['setting_value'];
+}
+$stmt_config->close();
+
+// Image de fond avec fallback
+$bg_image = (!empty($general_config['bg_connexion']) && file_exists($general_config['bg_connexion'])) 
+    ? $general_config['bg_connexion'] 
+    : 'img/2024.jpg';
+
 // Initialize error message
 $error = '';
 
@@ -30,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "Veuillez entrer une adresse email valide.";
         } else {
             // Check if email exists
-            $stmt = $conn->prepare("SELECT id, email, password, full_name FROM users WHERE email = ?");
+            $stmt = $conn->prepare("SELECT id, email, password, full_name, tutorial_completed FROM users WHERE email = ?");
             if (!$stmt) {
                 $error = "Erreur de connexion à la base de données.";
             } else {
@@ -60,7 +75,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // Regenerate session ID for security
                         session_regenerate_id(true);
 
-                        header("Location: dashboard.php");
+                        // Vérifier si c'est la première connexion (tutoriel non complété)
+                        if (isset($user['tutorial_completed']) && $user['tutorial_completed'] == 0) {
+                            header("Location: dashboard.php?tutorial=1");
+                        } else {
+                            header("Location: dashboard.php");
+                        }
                         exit;
                     } else {
                         // Incorrect password
@@ -83,6 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Connexion à SIGMA Alumni">
     <title>Se connecter - SIGMA Alumni</title>
+    <?php include 'includes/favicon.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         * {
@@ -97,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-image: url('img/2024.jpg');
+            background-image: url('<?php echo htmlspecialchars($bg_image); ?>');
             background-repeat: no-repeat;
             background-position: center;
             background-attachment: fixed;

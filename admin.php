@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_general_config
     }
     
     // Traitement des URLs et textes
-    $text_fields = ['instagram_url', 'tiktok_url', 'contact_email', 'contact_phone', 'contact_address'];
+    $text_fields = ['instagram_url', 'tiktok_url', 'facebook_url', 'linkedin_url', 'contact_email', 'contact_phone', 'contact_address'];
     foreach ($text_fields as $field) {
         if (isset($_POST[$field])) {
             $value = trim($_POST[$field]);
@@ -117,7 +117,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_general_config
         'footer_logo' => ['path' => 'img/', 'ext' => ['jpg', 'jpeg', 'png', 'svg'], 'max' => 5],
         'favicon' => ['path' => 'img/', 'ext' => ['ico', 'png', 'jpg'], 'max' => 2],
         'admin_logo' => ['path' => 'img/', 'ext' => ['jpg', 'jpeg', 'png', 'svg'], 'max' => 5],
-        'header_logo' => ['path' => 'img/', 'ext' => ['jpg', 'jpeg', 'png', 'svg'], 'max' => 5]
+        'header_logo' => ['path' => 'img/', 'ext' => ['jpg', 'jpeg', 'png', 'svg'], 'max' => 5],
+        'bg_verification' => ['path' => 'img/', 'ext' => ['jpg', 'jpeg', 'png'], 'max' => 10],
+        'bg_connexion' => ['path' => 'img/', 'ext' => ['jpg', 'jpeg', 'png'], 'max' => 10],
+        'bg_settings' => ['path' => 'img/', 'ext' => ['jpg', 'jpeg', 'png'], 'max' => 10],
+        'bg_creation_compte' => ['path' => 'img/', 'ext' => ['jpg', 'jpeg', 'png'], 'max' => 10]
     ];
     
     foreach ($other_files as $field => $config) {
@@ -205,6 +209,8 @@ $config_stmt->close();
 $default_config = [
     'instagram_url' => 'https://instagram.com/sigmaofficial',
     'tiktok_url' => 'https://tiktok.com/@sigmaofficial',
+    'facebook_url' => 'https://facebook.com/sigmaofficial',
+    'linkedin_url' => 'https://linkedin.com/company/sigmaofficial',
     'contact_email' => 'contact@sigma-alumni.org',
     'contact_phone' => '+33 1 23 45 67 89',
     'contact_address' => '123 Rue de l\'Éducation, 75001 Paris, France',
@@ -212,7 +218,11 @@ $default_config = [
     'hero_video' => 'path/to/local/video.mp4',
     'favicon' => 'img/favicon.ico',
     'admin_logo' => 'img/image.png',
-    'header_logo' => 'img/image.png'
+    'header_logo' => 'img/image.png',
+    'bg_verification' => 'img/2023.jpg',
+    'bg_connexion' => 'img/2024.jpg',
+    'bg_settings' => 'img/sigma build.jpg',
+    'bg_creation_compte' => 'img/2023.jpg'
 ];
 
 foreach ($default_config as $key => $value) {
@@ -2797,6 +2807,10 @@ $stmt->close();
                     <i class="fas fa-sliders-h"></i>
                     <span>Configuration</span>
                 </div>
+                <div class="nav-item" data-target="background-images" data-tooltip="Images de fond">
+                    <i class="fas fa-image"></i>
+                    <span>Images de fond</span>
+                </div>
                 <div class="nav-item" data-target="festive-themes" data-tooltip="Thèmes Festifs">
                     <i class="fas fa-palette"></i>
                     <span>Thèmes Festifs</span>
@@ -3420,92 +3434,7 @@ $stmt->close();
                             <i class="fas fa-envelope text-blue-600 mr-2"></i>
                             Gestion des Contacts
                         </h2>
-                        <p class="text-gray-600 mt-2">Configurez les informations de contact et gérez les messages reçus</p>
-                    </div>
-
-                    <!-- Informations de Contact -->
-                    <div class="mb-8">
-                        <h3 class="text-xl font-semibold mb-4 text-blue-700">
-                            <i class="fas fa-info-circle mr-2"></i>
-                            Informations de Contact
-                        </h3>
-                        
-                        <form method="POST">
-                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                <!-- Coordonnées principales -->
-                                <div class="space-y-4">
-                                    <h4 class="font-semibold text-gray-700 border-b pb-2">Coordonnées principales</h4>
-                                    
-                                    <div class="form-group">
-                                        <label class="form-label">Email de contact *</label>
-                                        <input type="email" name="email" id="email" value="<?php echo htmlspecialchars($contact_info['email']); ?>" class="form-input" required>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label class="form-label">Téléphone *</label>
-                                        <input type="text" name="phone" id="phone" value="<?php echo htmlspecialchars($contact_info['phone']); ?>" class="form-input" required>
-                                    </div>
-                                </div>
-
-                                <!-- Horaires -->
-                                <div class="space-y-4">
-                                    <h4 class="font-semibold text-gray-700 border-b pb-2">Horaires d'ouverture</h4>
-                                    
-                                    <div class="form-group">
-                                        <label class="form-label">Horaires *</label>
-                                        <textarea name="hours" id="hours" class="form-input form-textarea" rows="3" required><?php echo $contact_info['hours']; ?></textarea>
-                                        <p class="text-sm text-gray-500 mt-1">Ex: Lundi - Vendredi : 9h - 18h</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Adresse -->
-                            <div class="form-group mb-6">
-                                <label class="form-label">Adresse complète *</label>
-                                <textarea name="address" id="address" class="form-input form-textarea" rows="3" required><?php echo $contact_info['address']; ?></textarea>
-                            </div>
-
-                            <!-- Réseaux sociaux -->
-                            <div class="mb-6">
-                                <h4 class="font-semibold text-gray-700 mb-4">Réseaux Sociaux</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div class="form-group">
-                                        <label class="form-label">URL Instagram</label>
-                                        <input type="url" name="instagram_url" id="instagram_url" value="<?php echo htmlspecialchars($contact_info['instagram_url'] ?? ''); ?>" class="form-input" placeholder="https://instagram.com/votre-compte">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">URL TikTok</label>
-                                        <input type="url" name="tiktok_url" id="tiktok_url" value="<?php echo htmlspecialchars($contact_info['tiktok_url'] ?? ''); ?>" class="form-input" placeholder="https://tiktok.com/@votre-compte">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">URL LinkedIn</label>
-                                        <input type="url" name="linkedin_url" id="linkedin_url" value="<?php echo htmlspecialchars($contact_info['linkedin_url'] ?? ''); ?>" class="form-input" placeholder="https://linkedin.com/company/votre-entreprise">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">URL Facebook</label>
-                                        <input type="url" name="facebook_url" id="facebook_url" value="<?php echo htmlspecialchars($contact_info['facebook_url'] ?? ''); ?>" class="form-input" placeholder="https://facebook.com/votre-page">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Carte -->
-                            <div class="form-group">
-                                <label class="form-label">Code iframe Google Maps *</label>
-                                <textarea name="map_iframe" id="map_iframe" class="form-input form-textarea" rows="4" required><?php echo $contact_info['map_iframe']; ?></textarea>
-                                <p class="text-sm text-gray-500 mt-1">
-                                    <a href="https://www.google.com/maps" target="_blank" class="text-blue-600 hover:underline">
-                                        Obtenir le code iframe depuis Google Maps
-                                    </a>
-                                </p>
-                            </div>
-
-                            <button type="submit" name="update_contact_info" class="btn btn-primary">
-                                <i class="fas fa-save mr-2"></i>
-                                Mettre à jour les informations
-                            </button>
-                        </form>
+                        <p class="text-gray-600 mt-2">Gérez les messages reçus</p>
                     </div>
 
                     <!-- Messages Reçus -->
@@ -3624,6 +3553,14 @@ $stmt->close();
                         <div class="mb-8">
                             <h3 class="text-xl font-semibold mb-4">Réseaux Sociaux</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">URL Facebook</label>
+                                    <input type="url" name="facebook_url" value="<?php echo $general_config['facebook_url']; ?>" class="form-input" placeholder="https://facebook.com/votre-page">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">URL LinkedIn</label>
+                                    <input type="url" name="linkedin_url" value="<?php echo $general_config['linkedin_url']; ?>" class="form-input" placeholder="https://linkedin.com/company/votre-entreprise">
+                                </div>
                                 <div>
                                     <label class="block text-sm font-medium mb-1">URL Instagram</label>
                                     <input type="url" name="instagram_url" value="<?php echo $general_config['instagram_url']; ?>" class="form-input" placeholder="https://instagram.com/votre-compte">
@@ -3859,6 +3796,126 @@ $stmt->close();
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </section>
+            
+            <!-- Images de fond -->
+            <section id="background-images" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-image text-blue-600 mr-2"></i>
+                            Gestion des Images de Fond
+                        </h2>
+                        <p class="text-gray-600 mt-2">Personnalisez les images de fond des pages d'authentification</p>
+                    </div>
+
+                    <?php if (isset($_SESSION['success'])): ?>
+                        <div class="mb-4 p-4 bg-green-50 border-l-4 border-green-500 text-green-700">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                <p><?php echo $_SESSION['success']; unset($_SESSION['success']); ?></p>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <?php if (isset($_SESSION['error'])): ?>
+                        <div class="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-circle mr-2"></i>
+                                <p><?php echo $_SESSION['error']; unset($_SESSION['error']); ?></p>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Image de fond - Page de vérification -->
+                            <div class="bg-gray-50 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-4 text-gray-800">
+                                    <i class="fas fa-check-circle text-blue-600 mr-2"></i>
+                                    Page de Vérification
+                                </h3>
+                                <?php if ($general_config['bg_verification'] && file_exists($general_config['bg_verification'])): ?>
+                                    <div class="mb-4">
+                                        <img src="<?php echo htmlspecialchars($general_config['bg_verification']); ?>" alt="Image actuelle" class="w-full h-40 object-cover rounded-lg border">
+                                        <p class="text-sm text-gray-500 mt-2">Image actuelle</p>
+                                    </div>
+                                <?php endif; ?>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Nouvelle image de fond</label>
+                                    <input type="file" name="bg_verification" class="form-input" accept=".jpg,.jpeg,.png">
+                                    <p class="text-xs text-gray-500 mt-2">Formats acceptés: JPG, PNG (max 10MB)</p>
+                                </div>
+                            </div>
+
+                            <!-- Image de fond - Page de connexion -->
+                            <div class="bg-gray-50 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-4 text-gray-800">
+                                    <i class="fas fa-sign-in-alt text-blue-600 mr-2"></i>
+                                    Page de Connexion
+                                </h3>
+                                <?php if ($general_config['bg_connexion'] && file_exists($general_config['bg_connexion'])): ?>
+                                    <div class="mb-4">
+                                        <img src="<?php echo htmlspecialchars($general_config['bg_connexion']); ?>" alt="Image actuelle" class="w-full h-40 object-cover rounded-lg border">
+                                        <p class="text-sm text-gray-500 mt-2">Image actuelle</p>
+                                    </div>
+                                <?php endif; ?>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Nouvelle image de fond</label>
+                                    <input type="file" name="bg_connexion" class="form-input" accept=".jpg,.jpeg,.png">
+                                    <p class="text-xs text-gray-500 mt-2">Formats acceptés: JPG, PNG (max 10MB)</p>
+                                </div>
+                            </div>
+
+                            <!-- Image de fond - Page paramètres -->
+                            <div class="bg-gray-50 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-4 text-gray-800">
+                                    <i class="fas fa-cog text-blue-600 mr-2"></i>
+                                    Page Paramètres
+                                </h3>
+                                <?php if ($general_config['bg_settings'] && file_exists($general_config['bg_settings'])): ?>
+                                    <div class="mb-4">
+                                        <img src="<?php echo htmlspecialchars($general_config['bg_settings']); ?>" alt="Image actuelle" class="w-full h-40 object-cover rounded-lg border">
+                                        <p class="text-sm text-gray-500 mt-2">Image actuelle</p>
+                                    </div>
+                                <?php endif; ?>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Nouvelle image de fond</label>
+                                    <input type="file" name="bg_settings" class="form-input" accept=".jpg,.jpeg,.png">
+                                    <p class="text-xs text-gray-500 mt-2">Formats acceptés: JPG, PNG (max 10MB)</p>
+                                </div>
+                            </div>
+
+                            <!-- Image de fond - Page création compte -->
+                            <div class="bg-gray-50 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-4 text-gray-800">
+                                    <i class="fas fa-user-plus text-blue-600 mr-2"></i>
+                                    Page Création de Compte
+                                </h3>
+                                <?php if ($general_config['bg_creation_compte'] && file_exists($general_config['bg_creation_compte'])): ?>
+                                    <div class="mb-4">
+                                        <img src="<?php echo htmlspecialchars($general_config['bg_creation_compte']); ?>" alt="Image actuelle" class="w-full h-40 object-cover rounded-lg border">
+                                        <p class="text-sm text-gray-500 mt-2">Image actuelle</p>
+                                    </div>
+                                <?php endif; ?>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Nouvelle image de fond</label>
+                                    <input type="file" name="bg_creation_compte" class="form-input" accept=".jpg,.jpeg,.png">
+                                    <p class="text-xs text-gray-500 mt-2">Formats acceptés: JPG, PNG (max 10MB)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6">
+                            <button type="submit" name="update_general_config" class="btn btn-primary">
+                                <i class="fas fa-save mr-2"></i>
+                                Enregistrer les modifications
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </section>
             

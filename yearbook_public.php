@@ -9,10 +9,11 @@ function sanitize($data) {
 // Filtres limités : nom et année seulement
 $bac_year = isset($_GET['bac_year']) ? sanitize($_GET['bac_year']) : '';
 $search_name = isset($_GET['search_name']) ? sanitize($_GET['search_name']) : '';
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $sort_by = 'full_name';
 $sort_order = 'ASC';
 $limit = 12;
-$offset = 0;
+$offset = ($page - 1) * $limit;
 
 // Build SQL query
 $query = "SELECT id, full_name, email, studies, bac_year, profile_picture
@@ -34,6 +35,18 @@ if ($bac_year) {
     $types .= 'i';
 }
 
+// Compter le total
+$count_query = "SELECT COUNT(*) as total FROM users WHERE 1=1";
+if ($search_name) {
+    $count_query .= " AND (full_name LIKE '%$search_name%' OR email LIKE '%$search_name%')";
+}
+if ($bac_year) {
+    $count_query .= " AND bac_year = $bac_year";
+}
+$count_result = $conn->query($count_query);
+$total_users = $count_result->fetch_assoc()['total'];
+$has_more = ($offset + $limit) < $total_users;
+
 $query .= " ORDER BY $sort_by $sort_order LIMIT ? OFFSET ?";
 $params[] = $limit;
 $params[] = $offset;
@@ -47,6 +60,16 @@ $stmt->execute();
 $result = $stmt->get_result();
 $users = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
+
+// Si requête AJAX, renvoyer JSON
+if (isset($_GET['ajax'])) {
+    header('Content-Type: application/json');
+    echo json_encode([
+        'users' => $users,
+        'has_more' => $has_more
+    ]);
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -363,6 +386,34 @@ $stmt->close();
         .show-filters-btn.hidden {
             display: none;
         }
+        
+        .load-more-btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 4px 6px rgba(52, 152, 219, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .load-more-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(52, 152, 219, 0.4);
+        }
+        
+        .load-more-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .load-more-btn i {
+            margin-right: 0.5rem;
+        }
 
         /* Mobile interface */
         @media (max-width: 768px) {
@@ -593,9 +644,20 @@ $stmt->close();
                 <p>Intégration sans Dérivation n'est que ruine de l'âme</p>
             </div>
         </div>
+        
+        <?php if ($has_more): ?>
+        <div style="text-align: center; margin: 2rem 0;">
+            <button id="loadMoreBtn" class="load-more-btn">
+                <i class="fas fa-chevron-down"></i> Afficher plus
+            </button>
+        </div>
+        <?php endif; ?>
     </div>
 
     <script>
+        let currentPage = <?php echo $page; ?>;
+        let isLoading = false;
+        let hasMore = <?php echo $has_more ? 'true' : 'false'; ?>;
         // Gestion des filtres mobile et desktop
         const filterToggle = document.getElementById('filterToggle');
         const filtersContainer = document.getElementById('filtersContainer');
@@ -672,6 +734,66 @@ $stmt->close();
         document.getElementById('clearFilters').addEventListener('click', () => {
             window.location.href = 'yearbook_public.php';
         });
+        
+        // Charger plus de profils
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', async () => {
+                if (isLoading || !hasMore) return;
+                
+                isLoading = true;
+                loadMoreBtn.disabled = true;
+                loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Chargement...';
+                
+                try {
+                    currentPage++;
+                    const searchName = document.getElementById('searchName').value;
+                    const bacYear = document.getElementById('yearFilter').value;
+                    
+                    const params = new URLSearchParams();
+                    params.append('page', currentPage);
+                    if (searchName) params.append('search_name', searchName);
+                    if (bacYear) params.append('bac_year', bacYear);
+                    params.append('ajax', '1');
+                    
+                    const response = await fetch('yearbook_public.php?' + params.toString());
+                    const data = await response.json();
+                    
+                    const profileGrid = document.getElementById('profileGrid');
+                    const loading = document.getElementById('loading');
+                    
+                    data.users.forEach(user => {
+                        const card = document.createElement('div');
+                        card.className = 'profile-card';
+                        card.innerHTML = `
+                            <img src="${user.profile_picture || 'img/profile_pic.jpeg'}" alt="Photo de profil" class="profile-image" onerror="this.src='img/profile_pic.jpeg'">
+                            <div class="profile-info">
+                                <h3 class="profile-name">${user.full_name}</h3>
+                                <div class="profile-detail">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>${user.bac_year || 'Non spécifié'}</span>
+                                </div>
+                            </div>
+                        `;
+                        profileGrid.insertBefore(card, loading);
+                    });
+                    
+                    hasMore = data.has_more;
+                    if (!hasMore) {
+                        loadMoreBtn.style.display = 'none';
+                    } else {
+                        loadMoreBtn.disabled = false;
+                        loadMoreBtn.innerHTML = '<i class="fas fa-chevron-down"></i> Afficher plus';
+                    }
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    loadMoreBtn.disabled = false;
+                    loadMoreBtn.innerHTML = '<i class="fas fa-chevron-down"></i> Afficher plus';
+                }
+                
+                isLoading = false;
+            });
+        }
     </script>
 </body>
 </html>

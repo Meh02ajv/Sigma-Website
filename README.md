@@ -1,10 +1,11 @@
 # 🎓 SIGMA Alumni - Plateforme de Réseau des Anciens Élèves
 
-![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)
 ![PHP](https://img.shields.io/badge/PHP-7.4%2B-purple.svg)
 ![MySQL](https://img.shields.io/badge/MySQL-5.7%2B-orange.svg)
 ![WebSocket](https://img.shields.io/badge/WebSocket-Enabled-green.svg)
 ![UTF-8](https://img.shields.io/badge/Encoding-UTF--8-brightgreen.svg)
+![Automation](https://img.shields.io/badge/Automation-CRON-orange.svg)
 
 **Plateforme web complète pour gérer et animer la communauté des anciens élèves de SIGMA.**  
 Réseau professionnel, messagerie temps réel, événements, élections et souvenirs partagés.
@@ -53,6 +54,8 @@ SIGMA Alumni est une plateforme sociale dédiée aux anciens élèves permettant
 - Récupération de mot de passe par email
 - Protection CSRF et validation des entrées
 - Support complet UTF-8 pour tous les caractères (français, accents, apostrophes)
+- **Tutoriel interactif** au premier login (Driver.js)
+- Guide contextuel disponible dans les paramètres
 
 ### 👤 Profils Enrichis
 - Profil personnalisable (photo, bio, études, promotion)
@@ -115,6 +118,15 @@ SIGMA Alumni est une plateforme sociale dédiée aux anciens élèves permettant
 - Gestion des emails de masse avec logo intégré
 - Système de signalement et suggestions
 - Affichage correct des caractères spéciaux dans toutes les interfaces
+- **Gestion des images de fond** dynamiques
+
+### 🎂 Automatisation & Emails
+- **Anniversaires automatiques** : Email personnalisé le jour J
+- **Rappels d'anniversaire** : Notification aux membres 2 jours avant
+- **Voeux du Nouvel An** : Email festif automatique le 1er janvier
+- Emails HTML professionnels avec animations
+- Scripts CRON configurables (Windows Task Scheduler)
+- Logs détaillés de toutes les exécutions
 
 ---
 
@@ -266,7 +278,13 @@ Sigma-Website/
 │   ├── send_message.php       # Envoyer message
 │   ├── get_notifications.php  # Récupérer notifications
 │   ├── autocomplete_users.php # Autocomplétion
-│   └── update_profile.php     # Mise à jour profil
+│   ├── update_profile.php     # Mise à jour profil
+│   └── mark_tutorial_completed.php # Complétion tutoriel
+│
+├── Automatisation CRON
+│   ├── messaging.js           # Client WebSocket
+│   └── tutorial.js            # Tutoriel interactif (Driver.js)otidiens
+│   └── cron_new_year.php      # Voeux du Nouvel An
 │
 ├── css/                       # Feuilles de style
 ├── js/                        # Scripts JavaScript
@@ -283,16 +301,23 @@ Sigma-Website/
 │   ├── 2024/
 │   └── 2025/
 │
-├── sql/                       # Scripts SQL
+│   ├── add_tutorial_field.sql # Migration tutoriel
+│   └── ...
+│
+├── sessions/                  # Sessions PHP
+├── logs/                      # Logs CRON automatiques
 ├── sessions/                  # Sessions PHP
 ├── vendor/                    # Dépendances Composer
-│
-└── Documentation
-    ├── AMELIORATIONS_SUGGEREES.md
-    ├── CONFIG_VIDEO_UPLOAD.md
+│CONFIGURATION_CRON.md       # ⭐ Configuration CRON
     ├── EMAIL_SYSTEM_DOCS.md
     ├── FONCTIONNALITES.md
     ├── GUIDE_INSTALLATION_SQL.md
+    ├── INSTALLATION_TUTORIEL.md    # ⭐ Installation tutoriel
+    ├── MESSAGERIE_README.md
+    ├── NOTIFICATIONS_README.md
+    ├── RECHERCHE_AVANCEE_README.md
+    ├── THEMES_FESTIFS.md
+    └── TUTORIEL_README.md          # ⭐ Guide tutorielN_SQL.md
     ├── MESSAGERIE_README.md
     ├── NOTIFICATIONS_README.md
     ├── RECHERCHE_AVANCEE_README.md
@@ -307,7 +332,8 @@ Sigma-Website/
 - **PHP 7.4+** - Langage serveur
 - **MySQL 5.7+** - Base de données
 - **Composer** - Gestionnaire de dépendances
-- **PHPMailer** - Envoi d'emails
+- **PHPMailer** - Envoi d'emai
+- **Driver.js 1.3.1** - Tutoriels interactifsls
 - **Ratchet** - Serveur WebSocket
 
 ### Frontend
@@ -339,10 +365,13 @@ Sigma-Website/
 ## 📚 Documentation
 
 ### Guides d'utilisation
-- [📋 Fonctionnalités complètes](FONCTIONNALITES.md) - Liste détaillée de toutes les fonctionnalités
+- [📋 Fonctionnalités complètes](FONCTIONNALITES.md) - Liste détaillée de
+- [🎓 Tutoriel interactif](TUTORIEL_README.md) - Documentation du système de tutoriel Driver.js
+- [🎂 Automatisation CRON](CONFIGURATION_CRON.md) - Configuration des emails automatiques toutes les fonctionnalités
 - [💬 Système de messagerie](MESSAGERIE_README.md) - Guide du système de messagerie WebSocket
 - [🔔 Système de notifications](NOTIFICATIONS_README.md) - Documentation des notifications
-- [🔍 Recherche avancée](RECHERCHE_AVANCEE_README.md) - Guide de la recherche dans l'annuaire
+- [🔍 Recherche avancée](RECHERCHE_AVANCEE_README.md) - Guide de la recherche
+- [📖 Installation tutoriel](INSTALLATION_TUTORIEL.md) - Installation du système de tutoriel interactif dans l'annuaire
 - [🎨 Thèmes festifs](THEMES_FESTIFS.md) - Gestion des thèmes saisonniers
 
 ### Guides d'installation
@@ -388,7 +417,9 @@ git push origin feature/ma-fonctionnalite
 ## 📊 Roadmap
 
 ### ✅ Phase 1 - Fondations (Complété)
-- [x] Système d'authentification
+- [x] Système d'authentificati
+- [x] Tutoriel interactif pour nouveaux utilisateurs
+- [x] Emails automatiques (anniversaires & Nouvel An)on
 - [x] Profils utilisateurs enrichis
 - [x] Recherche avancée
 - [x] Messagerie temps réel
@@ -477,15 +508,18 @@ Ce projet est privé et destiné uniquement à l'usage interne de l'association 
 Merci à tous les contributeurs et membres de l'association SIGMA Alumni qui font vivre cette plateforme !
 
 **Technologies utilisées avec** ❤️ :
+- [Driver.js](https://driverjs.com/)
 - [PHP](https://www.php.net/)
 - [MySQL](https://www.mysql.com/)
-- [Ratchet WebSocket](http://socketo.me/)
-- [PHPMailer](https://github.com/PHPMailer/PHPMailer)
-- [FontAwesome](https://fontawesome.com/)
-
----
-
-**Version actuelle** : 2.1.0  
+- [Ratchet WebSocket](htt2.0  
+**Dernière mise à jour** : 4 Janvier 2026  
+**Nouveautés v2.2.0** :
+- 🎓 **Tutoriel interactif** avec Driver.js au premier login
+- 🎂 **Emails d'anniversaire automatiques** avec design HTML professionnel
+- 🎆 **Voeux du Nouvel An** envoyés automatiquement le 1er janvier
+- 📅 **Système CRON** pour automatisation complète
+- 🖼️ **Gestion des images de fond** dans le panneau admin
+- 📖 **Guide "Aide"** accessible à tout moment depuis les paramè
 **Dernière mise à jour** : 3 Janvier 2026  
 **Nouveautés v2.1.0** :
 - ✅ Yearbook public accessible sans connexion

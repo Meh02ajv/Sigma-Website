@@ -254,6 +254,11 @@ $member_count = $result->fetch_assoc()['member_count'];
             }
         }
     </style>
+    
+    <!-- Driver.js pour le tutoriel -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
+    <script src="js/tutorial.js"></script>
 </head>
 <body>
     <?php include 'header.php'; ?>

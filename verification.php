@@ -1,6 +1,21 @@
 <?php
 require 'config.php';
 
+// Récupérer la configuration générale
+$stmt = $conn->prepare("SELECT setting_key, setting_value FROM general_config");
+$stmt->execute();
+$result = $stmt->get_result();
+$general_config = [];
+while ($row = $result->fetch_assoc()) {
+    $general_config[$row['setting_key']] = $row['setting_value'];
+}
+$stmt->close();
+
+// Image de fond avec fallback
+$bg_image = (!empty($general_config['bg_verification']) && file_exists($general_config['bg_verification'])) 
+    ? $general_config['bg_verification'] 
+    : 'img/2023.jpg';
+
 // Fonction de sanitisation pour nettoyer les données
 function sanitize($data) {
     return htmlspecialchars(stripslashes(trim($data)));
@@ -13,6 +28,7 @@ function sanitize($data) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Code de Vérification</title>
+    <?php include 'includes/favicon.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
@@ -22,7 +38,7 @@ function sanitize($data) {
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-image: url(img/2023.jpg);
+            background-image: url(<?php echo htmlspecialchars($bg_image); ?>);
             background-repeat: no-repeat;
             background-position: center;
             background-attachment: fixed;

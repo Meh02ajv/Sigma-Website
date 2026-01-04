@@ -38,8 +38,9 @@ $city = isset($_GET['city']) ? sanitize($_GET['city']) : '';
 $company = isset($_GET['company']) ? sanitize($_GET['company']) : '';
 $sort_by = isset($_GET['sort_by']) ? sanitize($_GET['sort_by']) : 'full_name';
 $sort_order = isset($_GET['sort_order']) && in_array(strtoupper($_GET['sort_order']), ['ASC', 'DESC']) ? strtoupper($_GET['sort_order']) : 'ASC';
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $limit = 12;
-$offset = 0;
+$offset = ($page - 1) * $limit;
 
 // Validate sort_by to prevent SQL injection
 $allowed_sort_columns = ['full_name', 'bac_year'];
@@ -94,6 +95,30 @@ if ($company) {
     $types .= 's';
 }
 
+// Compter le total pour vérifier s'il y a plus de profils
+$count_query = "SELECT COUNT(*) as total FROM users WHERE 1=1";
+if ($search_name) {
+    $count_query .= " AND (full_name LIKE '%$search_name%' OR email LIKE '%$search_name%')";
+}
+if ($bac_year) {
+    $count_query .= " AND bac_year = $bac_year";
+}
+if ($studies) {
+    $count_query .= " AND studies LIKE '%$studies%'";
+}
+if ($profession) {
+    $count_query .= " AND profession LIKE '%$profession%'";
+}
+if ($city) {
+    $count_query .= " AND city LIKE '%$city%'";
+}
+if ($company) {
+    $count_query .= " AND company LIKE '%$company%'";
+}
+$count_result = $conn->query($count_query);
+$total_users = $count_result->fetch_assoc()['total'];
+$has_more = ($offset + $limit) < $total_users;
+
 $query .= " ORDER BY $sort_by $sort_order LIMIT ? OFFSET ?";
 $params[] = $limit;
 $params[] = $offset;
@@ -107,6 +132,16 @@ $stmt->execute();
 $result = $stmt->get_result();
 $users = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
+
+// Si requête AJAX, renvoyer JSON
+if (isset($_GET['ajax'])) {
+    header('Content-Type: application/json');
+    echo json_encode([
+        'users' => $users,
+        'has_more' => $has_more
+    ]);
+    exit;
+}
 
 // Generate CSRF token
 $csrf_token = bin2hex(random_bytes(32));
@@ -609,6 +644,34 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
             grid-column: 1 / -1;
             font-style: italic;
             color: #7f8c8d;
+        }
+        
+        .load-more-btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 4px 6px rgba(52, 152, 219, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .load-more-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(52, 152, 219, 0.4);
+        }
+        
+        .load-more-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .load-more-btn i {
+            margin-right: 0.5rem;
         }
         
         .not-found {
@@ -1120,9 +1183,18 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
                     <p>Aucun utilisateur trouvé avec ces critères</p>
                 </div>
             <?php endif; ?>
-            <div class="loading hidden" id="loading">
-                <p>Intégration sans Dérivation n'est que ruine de l'âme</p>
-            </div>
+        </div>
+        
+        <?php if ($has_more): ?>
+        <div style="text-align: center; margin: 2rem 0;">
+            <button id="load-more-btn" class="load-more-btn">
+                <i class="fas fa-chevron-down"></i> Afficher plus
+            </button>
+        </div>
+        <?php endif; ?>
+        
+        <div style="text-align: center; padding: 2rem; font-style: italic; color: #7f8c8d;">
+            <p>Intégration sans Dérivation n'est que ruine de l'âme</p>
         </div>
     </div>
     
@@ -1199,8 +1271,8 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
     <script>
         // Code JavaScript corrigé
         let isLoading = false;
-        let page = 1;
-        let lastId = <?php echo count($users) > 0 ? max(array_column($users, 'id')) : 0; ?>;
+        let currentPage = <?php echo $page; ?>;
+        let hasMore = <?php echo $has_more ? 'true' : 'false'; ?>;
         const currentUserEmail = '<?php echo htmlspecialchars($user_email); ?>';
         const currentUserId = <?php echo $current_user['id']; ?>;
         let socket = null;
@@ -1308,54 +1380,67 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
             }
         }
 
-        // Infinite scroll
-        window.addEventListener('scroll', debounce(() => {
-            const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-            if (scrollTop + clientHeight >= scrollHeight - 100 && !isLoading) {
+        // Bouton Afficher plus
+        const loadMoreBtn = document.getElementById('load-more-btn');
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', () => {
                 loadMoreProfiles();
-            }
-        }, 200));
+            });
+        }
 
         // Load more profiles - avec recherche avancée
         async function loadMoreProfiles() {
-            if (isLoading) return;
+            if (isLoading || !hasMore) return;
+            
             isLoading = true;
-            const loading = document.getElementById('loading');
-            loading.classList.remove('hidden');
+            loadMoreBtn.disabled = true;
+            loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Chargement...';
 
             try {
-                const searchName = encodeURIComponent(document.getElementById('searchName').value);
-                const bacYear = encodeURIComponent(document.getElementById('yearFilter').value);
-                const studies = encodeURIComponent(document.getElementById('studyFilter').value);
-                const profession = encodeURIComponent(document.getElementById('professionFilter').value);
-                const company = encodeURIComponent(document.getElementById('companyFilter').value);
-                const city = encodeURIComponent(document.getElementById('cityFilter').value);
-                const sortBy = encodeURIComponent(document.getElementById('sortBy').value);
-                const sortOrder = encodeURIComponent(document.getElementById('sortOrder').value);
+                currentPage++;
+                const searchName = document.getElementById('searchName').value;
+                const bacYear = document.getElementById('yearFilter').value;
+                const studies = document.getElementById('studyFilter').value;
+                const profession = document.getElementById('professionFilter').value;
+                const company = document.getElementById('companyFilter').value;
+                const city = document.getElementById('cityFilter').value;
+                const sortBy = document.getElementById('sortBy').value;
+                const sortOrder = document.getElementById('sortOrder').value;
                 
-                const response = await fetch(`load_more_profiles.php?page=${page}&lastId=${lastId}&search_name=${searchName}&bac_year=${bacYear}&studies=${studies}&profession=${profession}&company=${company}&city=${city}&sort_by=${sortBy}&sort_order=${sortOrder}`);
+                const params = new URLSearchParams();
+                params.append('page', currentPage);
+                if (searchName) params.append('search_name', searchName);
+                if (bacYear) params.append('bac_year', bacYear);
+                if (studies) params.append('studies', studies);
+                if (profession) params.append('profession', profession);
+                if (company) params.append('company', company);
+                if (city) params.append('city', city);
+                params.append('sort_by', sortBy);
+                params.append('sort_order', sortOrder);
+                params.append('ajax', '1');
+                
+                const response = await fetch('yearbook.php?' + params.toString());
                 const data = await response.json();
                 const profileGrid = document.getElementById('profileGrid');
+                const loading = document.getElementById('loading');
                 
-                if (data.profiles && data.profiles.length === 0) {
-                    loading.innerHTML = '<p>Intégration sans Dérivation n\'est que ruine de l\'âme</p>';
-                } else if (data.profiles) {
-                    data.profiles.forEach(user => {
-                        const card = document.createElement('div');
-                        card.className = `profile-card ${user.is_birthday ? 'birthday' : ''}`;
-                        card.dataset.id = user.id;
-                        card.dataset.name = user.full_name;
-                        card.dataset.email = user.email;
-                        card.dataset.birthdate = user.birth_date || '';
-                        card.dataset.studies = user.studies || 'Non spécifié';
-                        card.dataset.bacyear = user.bac_year || 'Non spécifié';
-                        card.dataset.profession = user.profession || '';
-                        card.dataset.company = user.company || '';
-                        card.dataset.city = user.city || '';
-                        card.dataset.country = user.country || '';
-                        card.dataset.interests = user.interests || '';
-                        card.dataset.birthday = user.is_birthday ? 'true' : 'false';
-                        card.dataset.image = user.profile_picture || 'img/profile_pic.jpeg';
+                data.users.forEach(user => {
+                    const card = document.createElement('div');
+                    card.className = `profile-card ${user.is_birthday ? 'birthday' : ''}`;
+                    card.dataset.id = user.id;
+                    card.dataset.name = user.full_name;
+                    card.dataset.email = user.email;
+                    card.dataset.birthdate = user.birth_date || '';
+                    card.dataset.studies = user.studies || 'Non spécifié';
+                    card.dataset.bacyear = user.bac_year || 'Non spécifié';
+                    card.dataset.profession = user.profession || '';
+                    card.dataset.company = user.company || '';
+                    card.dataset.city = user.city || '';
+                    card.dataset.country = user.country || '';
+                    card.dataset.interests = user.interests || '';
+                    card.dataset.linkedin = user.linkedin_url || '';
+                    card.dataset.birthday = user.is_birthday ? 'true' : 'false';
+                    card.dataset.image = user.profile_picture || 'img/profile_pic.jpeg';
                         
                         // Construction des détails avec les nouveaux champs
                         let detailsHTML = `
@@ -1397,14 +1482,20 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
                             ${user.is_birthday ? '<span class="birthday-badge"><i class="fas fa-birthday-cake"></i> Anniversaire</span>' : ''}
                         `;
                         card.addEventListener('click', () => openProfileModal(card));
-                        profileGrid.insertBefore(card, loading);
-                        lastId = Math.max(lastId, user.id);
+                        profileGrid.appendChild(card);
                     });
-                    page++;
-                }
+                    
+                    hasMore = data.has_more;
+                    if (!hasMore) {
+                        loadMoreBtn.style.display = 'none';
+                    } else {
+                        loadMoreBtn.disabled = false;
+                        loadMoreBtn.innerHTML = '<i class="fas fa-arrow-down"></i> Afficher plus';
+                    }
             } catch (error) {
                 console.error('Erreur:', error);
-                loading.innerHTML = '<p>Intégration sans Dérivation n\'est que ruine de l\'âme</p>';
+                loadMoreBtn.disabled = false;
+                loadMoreBtn.innerHTML = '<i class="fas fa-arrow-down"></i> Afficher plus';
             } finally {
                 isLoading = false;
             }
@@ -1690,5 +1781,10 @@ function sendBirthdayNotification($birthday_user, $recipients, $is_reminder) {
             }
         });
     </script>
+    
+    <!-- Driver.js pour le tutoriel -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
+    <script src="js/tutorial.js"></script>
 </body>
 </html>

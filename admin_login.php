@@ -57,90 +57,105 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion Administrateur - Communauté Sigma</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <?php require 'includes/favicon.php'; ?>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         :root {
-            --sigma-blue: #1a237e;
-            --sigma-gold: #d4af37;
-            --sigma-light-blue: #e8eaf6;
-            --sigma-dark: #0d0d0d;
+            --primary-color: #042632ff;
+            --secondary-color: #3498db;
+            --accent-color: #d4af37;
+            --dark-color: #2c3e50;
+            --light-bg: #f8f9fa;
+            --white: #ffffff;
+            --danger: #e74c3c;
+            --success: #27ae60;
         }
 
         body {
-            font-family: 'Montserrat', sans-serif;
-            margin: 0;
-            background: linear-gradient(135deg, var(--sigma-light-blue), #f5f5f5);
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+            font-family: 'Open Sans', sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            color: var(--sigma-dark);
+            padding: 1rem;
         }
 
         .login-container {
-            max-width: 450px;
+            max-width: 480px;
             width: 100%;
-            background: white;
+            background: var(--white);
             border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            padding: 2rem;
-            margin: 1rem;
-            transition: transform 0.3s ease;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
         }
 
-        .login-container:hover {
-            transform: translateY(-5px);
+        .login-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #3949ab 100%);
+            padding: 3rem 2rem 2rem;
+            text-align: center;
         }
 
         .logo-container {
-            background-color: white;
-            border-radius: 50%;
             width: 120px;
             height: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             margin: 0 auto 1.5rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            border: 3px solid var(--sigma-gold);
         }
 
-        .logo-container div {
-            font-weight: 700;
-            color: var(--sigma-blue);
-            font-size: 1.5rem;
-            text-transform: uppercase;
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3));
         }
 
         h1 {
-            color: var(--sigma-blue);
-            text-align: center;
+            color: var(--white);
+            font-family: 'Montserrat', sans-serif;
             font-weight: 700;
             font-size: 1.75rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.5rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            font-weight: 300;
+        }
+
+        .login-body {
+            padding: 2.5rem 2rem;
         }
 
         .alert-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-            border-left: 4px solid #dc3545;
-            padding: 1rem;
+            background: #fee;
+            color: var(--danger);
+            border-left: 4px solid var(--danger);
+            padding: 1rem 1.5rem;
             border-radius: 8px;
             margin-bottom: 1.5rem;
             font-weight: 500;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-danger i {
+            font-size: 1.2rem;
         }
 
         form {
             display: flex;
             flex-direction: column;
-            gap: 1.25rem;
+            gap: 1.5rem;
         }
 
         .form-group {
@@ -149,92 +164,187 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .form-group label {
             display: block;
-            font-weight: 500;
-            color: var(--sigma-dark);
+            font-weight: 600;
+            color: var(--dark-color);
             margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+            pointer-events: none;
         }
 
         .form-control {
             width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 0.95rem;
+            padding: 0.9rem 1rem 0.9rem 3rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
             transition: all 0.3s ease;
+            background: var(--light-bg);
+            font-family: 'Open Sans', sans-serif;
         }
 
         .form-control:focus {
-            border-color: var(--sigma-blue);
-            box-shadow: 0 0 0 0.2rem rgba(26, 35, 126, 0.25);
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);
             outline: none;
+            background: var(--white);
         }
 
-        .form-group i {
+        .form-control::placeholder {
+            color: #999;
+        }
+
+        .toggle-password {
             position: absolute;
             right: 1rem;
-            top: 65%;
+            top: 50%;
             transform: translateY(-50%);
-            color: var(--sigma-blue);
-            font-size: 1rem;
+            color: #999;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
         }
 
-        button {
-            background-color: var(--sigma-blue);
-            color: white;
-            padding: 0.75rem;
+        .toggle-password:hover {
+            color: var(--secondary-color);
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #2980b9 100%);
+            color: var(--white);
+            padding: 1rem;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 600;
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(26, 35, 126, 0.2);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
-        button:hover {
-            background-color: var(--sigma-gold);
-            color: var(--sigma-blue);
+        .btn-login:hover {
             transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5);
         }
 
         @media (max-width: 576px) {
-            .login-container {
-                margin: 0.5rem;
-                padding: 1.5rem;
+            .login-header {
+                padding: 2rem 1.5rem 1.5rem;
+            }
+
+            .logo-container {
+                width: 100px;
+                height: 100px;
             }
 
             h1 {
                 font-size: 1.5rem;
+            }
+
+            .login-body {
+                padding: 2rem 1.5rem;
             }
         }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <div class="logo-container">
-            <div>SIGMA</div>
+        <div class="login-header">
+            <div class="logo-container">
+                <?php 
+                // Récupérer le logo admin depuis la base de données
+                $admin_logo = 'img/image.png'; // Valeur par défaut
+                $stmt = $conn->prepare("SELECT setting_value FROM general_config WHERE setting_key = 'admin_logo'");
+                if ($stmt) {
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    if ($row = $result->fetch_assoc()) {
+                        $admin_logo = $row['setting_value'];
+                    }
+                    $stmt->close();
+                }
+                
+                // Vérifier si le fichier existe
+                if (!file_exists($admin_logo)) {
+                    $admin_logo = 'img/image.png';
+                }
+                ?>
+                <img src="<?php echo htmlspecialchars($admin_logo); ?>" alt="Logo SIGMA" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div style="display: none; color: white; font-size: 2rem; font-weight: 700; text-align: center; line-height: 120px;">SIGMA</div>
+            </div>
+            <h1>Administration</h1>
+            <p class="subtitle">Espace réservé aux administrateurs</p>
         </div>
-        <h1>Connexion Administrateur</h1>
-        <?php if (isset($_SESSION['error'])): ?>
-            <div class="alert-danger"><?php echo htmlspecialchars($_SESSION['error']); ?></div>
-            <?php unset($_SESSION['error']); ?>
-        <?php endif; ?>
-        <form method="POST" action="admin_login.php">
-            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" name="email" id="email" placeholder="Entrez votre email" value="meh.ajavon@ashesi.edu.gh" required class="form-control">
-                <i class="fas fa-envelope"></i>
-            </div>
-            <div class="form-group">
-                <label for="password">Mot de passe</label>
-                <input type="password" name="password" id="password" placeholder="Entrez votre mot de passe" required class="form-control">
-                <i class="fas fa-lock"></i>
-            </div>
-            <button type="submit">
-                <i class="fas fa-sign-in-alt mr-2"></i> Se connecter
-            </button>
-        </form>
+        
+        <div class="login-body">
+            <?php if (isset($_SESSION['error'])): ?>
+                <div class="alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span><?php echo htmlspecialchars($_SESSION['error']); ?></span>
+                </div>
+                <?php unset($_SESSION['error']); ?>
+            <?php endif; ?>
+            
+            <form method="POST" action="admin_login.php">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input type="email" name="email" id="email" placeholder="admin@sigma.com" value="meh.ajavon@ashesi.edu.gh" required class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" name="password" id="password" placeholder="••••••••" required class="form-control">
+                        <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Se connecter</span>
+                </button>
+            </form>
+        </div>
     </div>
+
+    <script>
+        // Toggle password visibility
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+    </script>
 </body>
 </html>

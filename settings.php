@@ -1,3 +1,21 @@
+<?php
+require 'config.php';
+
+// Récupérer la configuration générale
+$stmt = $conn->prepare("SELECT setting_key, setting_value FROM general_config");
+$stmt->execute();
+$result = $stmt->get_result();
+$general_config = [];
+while ($row = $result->fetch_assoc()) {
+    $general_config[$row['setting_key']] = $row['setting_value'];
+}
+$stmt->close();
+
+// Image de fond avec fallback
+$bg_image = (!empty($general_config['bg_settings']) && file_exists($general_config['bg_settings'])) 
+    ? $general_config['bg_settings'] 
+    : 'img/sigma build.jpg';
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -37,7 +55,7 @@
             background: linear-gradient(135deg, var(--light-bg) 0%, #e2e8f0 100%);
             color: var(--text-dark);
             background-color: #fff;
-            background-image: url(img/sigma\ build.jpg);
+            background-image: url(<?php echo htmlspecialchars($bg_image); ?>);
             background-repeat: no-repeat;
             background-position: center;
             background-attachment: fixed;
@@ -400,6 +418,11 @@
                     Modifier mon profil
                 </a>
                 
+                <button onclick="startTutorial()" class="settings-btn" style="border: none; background: transparent; width: 100%; text-align: left; font: inherit;">
+                    <i class="fas fa-question-circle"></i>
+                    Aide - Guide du site
+                </button>
+                
                 <a href="suggestion.php" class="settings-btn">
                     <i class="fas fa-lightbulb"></i>
                     Faire une suggestion
@@ -414,6 +437,11 @@
     </div>
     
     <div class="sigma-watermark">SIGMA</div>
+    
+    <!-- Driver.js pour le tutoriel -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
+    <script src="js/tutorial.js"></script>
 
     <script>
         // Détection du toucher pour améliorer les interactions

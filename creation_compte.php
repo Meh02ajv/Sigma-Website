@@ -1,8 +1,26 @@
-<?php require 'config.php'; ?>
+<?php 
+require 'config.php';
+
+// Récupérer la configuration générale
+$stmt = $conn->prepare("SELECT setting_key, setting_value FROM general_config");
+$stmt->execute();
+$result = $stmt->get_result();
+$general_config = [];
+while ($row = $result->fetch_assoc()) {
+    $general_config[$row['setting_key']] = $row['setting_value'];
+}
+$stmt->close();
+
+// Image de fond avec fallback
+$bg_image = (!empty($general_config['bg_creation_compte']) && file_exists($general_config['bg_creation_compte'])) 
+    ? $general_config['bg_creation_compte'] 
+    : 'img/2023.jpg';
+?>
 <!DOCTYPE html>
 <html>
 <head>
     <title>Créer un compte</title>
+    <?php include 'includes/favicon.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
@@ -12,7 +30,7 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-image: url(img/2023.jpg);
+            background-image: url(<?php echo htmlspecialchars($bg_image); ?>);
             background-repeat: no-repeat;
             background-position: center;
             background-attachment: fixed;
