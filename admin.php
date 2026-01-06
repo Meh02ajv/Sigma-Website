@@ -112,6 +112,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_general_config
         }
     }
     
+    // Supprimer la vidéo hero
+    if (isset($_POST['delete_hero_video'])) {
+        $stmt = $conn->prepare("SELECT setting_value FROM general_config WHERE setting_key = 'hero_video'");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($row = $result->fetch_assoc()) {
+            $video_path = $row['setting_value'];
+            if (file_exists($video_path)) {
+                @unlink($video_path);
+            }
+        }
+        $stmt->close();
+        
+        // Supprimer de la base de données
+        $stmt = $conn->prepare("DELETE FROM general_config WHERE setting_key = 'hero_video'");
+        $stmt->execute();
+        $stmt->close();
+        
+        $_SESSION['success'] = "Vidéo supprimée avec succès!";
+    }
+    
     // Traitement des autres fichiers (logos, favicon)
     $other_files = [
         'footer_logo' => ['path' => 'img/', 'ext' => ['jpg', 'jpeg', 'png', 'svg'], 'max' => 5],
@@ -3625,6 +3646,9 @@ $stmt->close();
                                     <?php if ($general_config['hero_video'] && file_exists($general_config['hero_video'])): ?>
                                         <video src="<?php echo htmlspecialchars($general_config['hero_video']); ?>" class="w-64 h-36 object-cover border rounded" controls></video>
                                         <p class="text-xs text-gray-600 mt-1">Taille actuelle: <?php echo round(filesize($general_config['hero_video']) / (1024*1024), 2); ?> MB</p>
+                                        <button type="submit" name="delete_hero_video" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 mt-2" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette vidéo ?');">
+                                            <i class="fas fa-trash"></i> Supprimer la vidéo
+                                        </button>
                                     <?php endif; ?>
                                 </div>
                                 <input type="file" name="hero_video" class="form-input" accept=".mp4,.webm,.mov">

@@ -181,7 +181,7 @@ try {
         <!-- Current Bureau Section -->
         <div class="current-bureau">
             <div class="section-title">
-                <h2>Bureau Actuel (<?php echo date('Y'); ?>-<?php echo date('Y')+1; ?>)</h2>
+                <h2>Bureau Actuel</h2>
                 <p>Les membres élus pour représenter la communauté SIGMA Alumni</p>
             </div>
             <?php if (!empty($current_bureau)): ?>

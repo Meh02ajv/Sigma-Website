@@ -1,7 +1,26 @@
 <?php
 require 'config.php';
 
-session_start();
+// Récupérer la configuration générale
+$stmt_config = $conn->prepare("SELECT setting_key, setting_value FROM general_config");
+$stmt_config->execute();
+$result_config = $stmt_config->get_result();
+$general_config = [];
+while ($row = $result_config->fetch_assoc()) {
+    $general_config[$row['setting_key']] = $row['setting_value'];
+}
+$stmt_config->close();
+
+// Image de fond avec fallback
+$bg_image = (!empty($general_config['bg_connexion']) && file_exists($general_config['bg_connexion'])) 
+    ? $general_config['bg_connexion'] 
+    : 'img/2024.jpg';
+
+// Sanitization function
+function sanitize($data) {
+    global $conn;
+    return htmlspecialchars(strip_tags($conn->real_escape_string(trim($data))));
+}
 
 // Validate query parameters
 $email = isset($_GET['email']) ? sanitize($_GET['email']) : '';
@@ -68,19 +87,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Réinitialiser le mot de passe</title>
     <?php include 'includes/favicon.php'; ?>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-image: url('img/2024.jpg');
+            min-height: 100vh;
+            background-image: url('<?php echo htmlspecialchars($bg_image); ?>');
             background-repeat: no-repeat;
             background-position: center;
             background-attachment: fixed;
             background-size: cover;
+            padding: 1rem;
         }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: -1;
+        }
+
         .container {
             background: rgba(255, 255, 255, 0.9);
             padding: 20px;
