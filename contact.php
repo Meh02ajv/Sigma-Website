@@ -65,24 +65,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_contact'])) {
 
     // Send email notification
     if ($success) {
-        try {
-            $mail = new PHPMailer(true);
-            $mail->isSMTP();
-            $mail->Host = SMTP_HOST;
-            $mail->SMTPAuth = true;
-            $mail->Username = SMTP_USERNAME;
-            $mail->Password = SMTP_PASSWORD;
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = SMTP_PORT;
-
-            $mail->setFrom($email, $name);
-            $mail->addAddress($contact_info['email'], 'SIGMA Alumni');
-            $mail->Subject = 'Nouveau message de contact: ' . $subject;
-            $mail->Body = "Nom: $name\nEmail: $email\nSujet: $subject\nMessage:\n$message";
-            $mail->send();
+        // Créer un email professionnel pour l'admin
+        $base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://" . $_SERVER['HTTP_HOST'];
+        
+        $email_subject = "📧 Nouveau message de contact - " . $subject;
+        
+        $email_body = "
+        <!DOCTYPE html>
+        <html lang='fr'>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Message de contact</title>
+            <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+                .email-wrapper { width: 100%; background-color: #f4f4f4; padding: 20px 0; }
+                .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }
+                .header { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white; padding: 40px 30px; text-align: center; }
+                .header h1 { margin: 10px 0 0 0; font-size: 24px; font-weight: 600; }
+                .icon { font-size: 48px; margin-bottom: 10px; }
+                .content { padding: 40px 30px; background-color: #ffffff; }
+                .info-box { background: #f9fafb; padding: 20px; border-left: 4px solid #8b5cf6; margin: 25px 0; border-radius: 4px; }
+                .info-box p { margin: 8px 0; color: #4b5563; }
+                .message-box { background: #ffffff; border: 1px solid #e5e7eb; padding: 20px; margin: 20px 0; border-radius: 6px; }
+                .footer { background: #f9fafb; padding: 30px; text-align: center; color: #6b7280; font-size: 13px; border-top: 1px solid #e5e7eb; }
+                .label { font-weight: 600; color: #1f2937; }
+                @media only screen and (max-width: 600px) {
+                    .content, .header, .footer { padding: 20px !important; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class='email-wrapper'>
+                <div class='container'>
+                    <div class='header'>
+                        <div class='icon'>📧</div>
+                        <h1>Nouveau Message de Contact</h1>
+                    </div>
+                    <div class='content'>
+                        <p>Un nouveau message a été reçu via le formulaire de contact.</p>
+                        
+                        <div class='info-box'>
+                            <p><span class='label'>👤 Expéditeur :</span> " . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . "</p>
+                            <p><span class='label'>📨 Email :</span> <a href='mailto:" . htmlspecialchars($email, ENT_QUOTES, 'UTF-8') . "'>" . htmlspecialchars($email, ENT_QUOTES, 'UTF-8') . "</a></p>
+                            <p><span class='label'>📝 Sujet :</span> " . htmlspecialchars($subject, ENT_QUOTES, 'UTF-8') . "</p>
+                            <p><span class='label'>📅 Date :</span> " . date('d/m/Y à H:i') . "</p>
+                        </div>
+                        
+                        <p class='label'>Message :</p>
+                        <div class='message-box'>
+                            <p style='white-space: pre-wrap; margin: 0; color: #374151;'>" . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . "</p>
+                        </div>
+                        
+                        <p style='color: #6b7280; font-size: 14px; margin-top: 30px;'>
+                            Pour répondre, utilisez directement l'adresse email de l'expéditeur.
+                        </p>
+                    </div>
+                    <div class='footer'>
+                        <p><strong>SIGMA Alumni</strong> - Système de Contact</p>
+                        <p>Cet email a été généré automatiquement par le formulaire de contact.</p>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+        ";
+        
+        $email_altBody = "NOUVEAU MESSAGE DE CONTACT\n\n" .
+                        "Expéditeur : $name\n" .
+                        "Email : $email\n" .
+                        "Sujet : $subject\n" .
+                        "Date : " . date('d/m/Y à H:i') . "\n\n" .
+                        "MESSAGE :\n" .
+                        "---\n" .
+                        "$message\n" .
+                        "---\n\n" .
+                        "Pour répondre, utilisez : $email\n\n" .
+                        "SIGMA Alumni - Système de Contact";
+        
+        if (sendEmail($contact_info['email'], 'SIGMA Alumni', $email_subject, $email_body, $email_altBody)) {
             $_SESSION['success'] = "Votre message a été envoyé avec succès.";
-        } catch (Exception $e) {
-            $_SESSION['error'] = "Erreur lors de l'envoi de l'email: " . $mail->ErrorInfo;
+        } else {
+            $_SESSION['error'] = "Erreur lors de l'envoi de l'email.";
         }
     } else {
         $_SESSION['error'] = "Erreur lors de l'enregistrement du message.";

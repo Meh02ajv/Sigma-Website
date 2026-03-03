@@ -1,9 +1,6 @@
 <?php
 require 'config.php';
-require 'vendor/autoload.php'; // Replace with manual includes if not using Composer
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+require 'send_email.php';
 
 // Sanitization function
 function sanitize($data) {
@@ -47,59 +44,118 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $stmt->close();
 
-    // Send reset email using PHPMailer
-    $reset_link = "https://votre-domaine.com/reset_password.php?email=" . urlencode($email) . "&token=" . urlencode($token);
+    // Générer le lien de réinitialisation
+    $base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://" . $_SERVER['HTTP_HOST'];
+    $reset_link = $base_url . "/Sigma-Website/reset_password.php?email=" . urlencode($email) . "&token=" . urlencode($token);
     $full_name = $user['full_name'] ?: 'Utilisateur';
 
-    $mail = new PHPMailer(true);
-    try {
-        // Server settings (Gmail)
-        $mail->isSMTP();
-        $mail->Host = SMTP_HOST;
-        $mail->SMTPAuth = true;
-        $mail->Username = SMTP_USERNAME;
-        $mail->Password = SMTP_PASSWORD;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = SMTP_PORT;
-        $mail->CharSet = 'UTF-8';
-
-        // Recipients
-        $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
-        $mail->addAddress($email, $full_name);
-        $mail->addReplyTo(SMTP_REPLY_TO_EMAIL, SMTP_REPLY_TO_NAME);
-        
-        // Attacher le logo
-        $logo_path = __DIR__ . '/img/image.png';
-        if (file_exists($logo_path)) {
-            $mail->addEmbeddedImage($logo_path, 'logo', 'logo.png');
-        }
-
-        // Content
-        $mail->isHTML(true);
-        $mail->Subject = 'Réinitialisation de votre mot de passe';
-        $mail->Body = "
-            <html>
-            <head><meta charset='UTF-8'></head>
-            <body style='font-family: Arial, sans-serif;'>
-                <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
-                    <img src='cid:logo' alt='Sigma Logo' style='width: 100px;'>
-                    <h2 style='color: #1e3a8a;'>Bonjour $full_name,</h2>
-                    <p>Vous avez demandé à réinitialiser votre mot de passe. Cliquez sur le lien ci-dessous pour procéder :</p>
-                    <p><a href='$reset_link' style='color: #1e3a8a; text-decoration: underline;'>Réinitialiser mon mot de passe</a></p>
-                    <p>Ce lien est valable pendant 1 heure. Si vous n'avez pas demandé cette réinitialisation, ignorez cet e-mail.</p>
-                    <p style='color: #7f8c8d;'>Cordialement,<br>L'équipe de la plateforme</p>
-                    <p style='font-size: 12px; color: #95a5a6;'>Cet e-mail est automatique, veuillez ne pas y répondre.</p>
+    // Template HTML professionnel avec bouton cliquable
+    $subject = "Réinitialisation de votre mot de passe - SIGMA Alumni";
+    
+    $body = "
+    <!DOCTYPE html>
+    <html lang='fr'>
+    <head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>Réinitialisation de mot de passe</title>
+        <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+            .email-wrapper { width: 100%; background-color: #f4f4f4; padding: 20px 0; }
+            .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }
+            .header { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: white; padding: 40px 30px; text-align: center; }
+            .header h1 { margin: 10px 0 0 0; font-size: 24px; font-weight: 600; }
+            .icon { font-size: 48px; margin-bottom: 10px; }
+            .content { padding: 40px 30px; background-color: #ffffff; }
+            .content p { margin: 15px 0; color: #374151; line-height: 1.8; }
+            .button-container { text-align: center; margin: 35px 0; }
+            .button { display: inline-block; padding: 16px 40px; background: #dc2626; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; }
+            .button:hover { background: #b91c1c; }
+            .warning-box { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px 20px; margin: 25px 0; border-radius: 4px; }
+            .warning-box p { margin: 5px 0; color: #92400e; }
+            .footer { background: #f9fafb; padding: 30px; text-align: center; color: #6b7280; font-size: 13px; border-top: 1px solid #e5e7eb; }
+            .footer p { margin: 8px 0; }
+            .footer a { color: #dc2626; text-decoration: none; }
+            .link-text { word-break: break-all; background: #f3f4f6; padding: 10px; border-radius: 4px; font-size: 12px; color: #6b7280; margin-top: 15px; }
+            @media only screen and (max-width: 600px) {
+                .content, .header, .footer { padding: 20px !important; }
+                .button { padding: 14px 30px; font-size: 14px; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class='email-wrapper'>
+            <div class='container'>
+                <div class='header'>
+                    <div class='icon'>🔐</div>
+                    <h1>Réinitialisation de Mot de Passe</h1>
                 </div>
-            </body>
-            </html>
-        ";
-        $mail->AltBody = "Bonjour $full_name,\n\nVous avez demandé à réinitialiser votre mot de passe. Cliquez sur le lien suivant pour procéder :\n$reset_link\n\nCe lien est valable pendant 1 heure. Si vous n'avez pas demandé cette réinitialisation, ignorez cet e-mail.\n\nCordialement,\nL'équipe de la plateforme";
-
-        $mail->send();
+                <div class='content'>
+                    <p>Bonjour <strong>" . htmlspecialchars($full_name, ENT_QUOTES, 'UTF-8') . "</strong>,</p>
+                    
+                    <p>Nous avons reçu une demande de réinitialisation de mot de passe pour votre compte SIGMA Alumni.</p>
+                    
+                    <p>Pour réinitialiser votre mot de passe, cliquez sur le bouton ci-dessous :</p>
+                    
+                    <div class='button-container'>
+                        <a href='" . htmlspecialchars($reset_link, ENT_QUOTES, 'UTF-8') . "' class='button'>Réinitialiser mon Mot de Passe</a>
+                    </div>
+                    
+                    <p style='font-size: 13px; color: #6b7280;'>Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :</p>
+                    <div class='link-text'>" . htmlspecialchars($reset_link, ENT_QUOTES, 'UTF-8') . "</div>
+                    
+                    <div class='warning-box'>
+                        <p><strong>⚠️ Important :</strong></p>
+                        <p>• Ce lien est valable pendant <strong>1 heure</strong></p>
+                        <p>• Pour des raisons de sécurité, le lien ne peut être utilisé qu'une seule fois</p>
+                        <p>• Si vous n'avez pas demandé cette réinitialisation, ignorez cet email</p>
+                    </div>
+                    
+                    <p>Si vous rencontrez des difficultés, n'hésitez pas à contacter notre équipe support.</p>
+                    
+                    <p style='color: #6b7280; font-size: 14px; margin-top: 30px;'>
+                        Cordialement,<br>
+                        <strong>L'équipe SIGMA Alumni</strong>
+                    </p>
+                </div>
+                <div class='footer'>
+                    <p><strong>SIGMA Alumni</strong> - Communauté des anciens élèves</p>
+                    <p>Cet email a été envoyé automatiquement suite à votre demande de réinitialisation.</p>
+                    <p style='margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;'>
+                        <a href='$base_url/Sigma-Website/settings.php'>Gérer vos préférences</a> | 
+                        <a href='$base_url/Sigma-Website/contact.php'>Nous contacter</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    ";
+    
+    // Version texte alternative détaillée
+    $altBody = "RÉINITIALISATION DE MOT DE PASSE - SIGMA ALUMNI\n\n" .
+               "Bonjour $full_name,\n\n" .
+               "Nous avons reçu une demande de réinitialisation de mot de passe pour votre compte SIGMA Alumni.\n\n" .
+               "Pour réinitialiser votre mot de passe, cliquez sur le lien suivant :\n" .
+               "$reset_link\n\n" .
+               "INFORMATIONS IMPORTANTES\n" .
+               "• Ce lien est valable pendant 1 heure\n" .
+               "• Pour des raisons de sécurité, le lien ne peut être utilisé qu'une seule fois\n" .
+               "• Si vous n'avez pas demandé cette réinitialisation, ignorez cet email\n\n" .
+               "Si vous rencontrez des difficultés, contactez notre équipe support.\n\n" .
+               "Cordialement,\n" .
+               "L'équipe SIGMA Alumni\n\n" .
+               "---\n" .
+               "SIGMA Alumni - Communauté des anciens élèves\n" .
+               "Cet email a été envoyé automatiquement suite à votre demande.\n" .
+               "Gérer vos préférences : $base_url/Sigma-Website/settings.php";
+    
+    // Utiliser la fonction sendEmail optimisée
+    if (sendEmail($email, $full_name, $subject, $body, $altBody)) {
         $_SESSION['reset_email'] = "Un lien de réinitialisation a été envoyé à votre adresse e-mail.";
-    } catch (Exception $e) {
+    } else {
         $_SESSION['error'] = "Erreur lors de l'envoi de l'e-mail de réinitialisation.";
-        error_log("PHPMailer Error: {$mail->ErrorInfo}", 3, "logs/email_errors.log");
+        error_log("Password reset email failed for: $email");
     }
 
     header("Location: password_reset.php");

@@ -6,7 +6,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 /**
- * Envoie un email en utilisant PHPMailer
+ * Envoie un email en utilisant PHPMailer avec optimisations anti-spam
  * 
  * @param string $to Email du destinataire
  * @param string $recipientName Nom du destinataire
@@ -19,7 +19,7 @@ function sendEmail($to, $recipientName, $subject, $body, $altBody = null) {
     $mail = new PHPMailer(true);
     
     try {
-        // Configuration du serveur
+        // Configuration du serveur SMTP
         $mail->isSMTP();
         $mail->Host = SMTP_HOST;
         $mail->SMTPAuth = true;
@@ -28,17 +28,79 @@ function sendEmail($to, $recipientName, $subject, $body, $altBody = null) {
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = SMTP_PORT;
         $mail->CharSet = 'UTF-8';
+        $mail->Encoding = 'base64';
+        
+        // Configuration anti-spam avancée
+        $mail->SMTPOptions = array(
+            'ssl' => array(
+                'verify_peer' => true,
+                'verify_peer_name' => true,
+                'allow_self_signed' => false
+            )
+        );
+        
+        // Timeout pour éviter les blocages
+        $mail->Timeout = 30;
+        $mail->SMTPKeepAlive = false;
+        
+        // Headers anti-spam
+        $mail->XMailer = ' '; // Masquer la version de PHPMailer
+        $mail->Priority = 3; // Priorité normale (1=High, 3=Normal, 5=Low)
         
         // Destinataires
         $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
         $mail->addAddress($to, $recipientName);
         $mail->addReplyTo(SMTP_REPLY_TO_EMAIL, SMTP_REPLY_TO_NAME);
         
+        // Headers personnalisés pour améliorer la délivrabilité
+        $mail->addCustomHeader('X-Auto-Response-Suppress', 'OOF, DR, RN, NRN, AutoReply');
+        $mail->addCustomHeader('X-Entity-ID', SMTP_FROM_EMAIL);
+        $mail->addCustomHeader('Return-Path', SMTP_FROM_EMAIL);
+        
+        // List-Unsubscribe header (recommandé pour éviter le spam)
+        $unsubscribe_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/Sigma-Website/settings.php';
+        $mail->addCustomHeader('List-Unsubscribe', '<' . $unsubscribe_url . '>');
+        $mail->addCustomHeader('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');
+        
+        // Message-ID personnalisé pour une meilleure réputation
+        $domain = 'sigma-alumni.local';
+        $messageId = sprintf('<%s.%s@%s>', time(), bin2hex(random_bytes(8)), $domain);
+        $mail->MessageID = $messageId;
+        
         // Contenu
         $mail->isHTML(true);
         $mail->Subject = $subject;
         $mail->Body = $body;
         $mail->AltBody = $altBody ?? strip_tags($body);
+        
+        // DKIM - Si configuré dans config.php
+        if (defined('DKIM_DOMAIN') && defined('DKIM_PRIVATE_KEY') && defined('DKIM_SELECTOR')) {
+            $mail->DKIM_domain = DKIM_DOMAIN;
+            $mail->DKIM_private = DKIM_PRIVATE_KEY;
+            $mail->DKIM_selector = DKIM_SELECTOR;
+            $mail->DKIM_passphrase = '';
+            $mail->DKIM_identity = SMTP_FROM_EMAIL;
+        }
+        
+        // Rate limiting simple pour éviter d'être blacklisté
+        static $email_count = 0;
+        static $last_batch_time = null;
+        
+        if ($last_batch_time === null) {
+            $last_batch_time = time();
+        }
+        
+        $email_count++;
+        
+        // Pause de 100ms tous les 10 emails
+        if ($email_count % 10 === 0) {
+            usleep(100000); // 100ms
+        }
+        
+        // Pause de 2 secondes toutes les 50 emails
+        if ($email_count % 50 === 0) {
+            sleep(2);
+        }
         
         $mail->send();
         error_log("Email envoyé avec succès à: $to - Sujet: $subject");
@@ -101,62 +163,105 @@ function sendVoteConfirmationEmail($user_id, $election_title, $positions) {
     
     $subject = "Confirmation de votre vote - " . $election_title;
     
+    $base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://" . ($_SERVER['HTTP_HOST'] ?? 'localhost') . "/Sigma-Website";
+    
     $body = "
     <!DOCTYPE html>
-    <html>
+    <html lang='fr'>
     <head>
         <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>Confirmation de vote</title>
         <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-            .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-            .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }
-            .button { display: inline-block; padding: 12px 30px; background: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-            .info-box { background: white; padding: 20px; border-left: 4px solid #2563eb; margin: 20px 0; border-radius: 5px; }
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+            .email-wrapper { width: 100%; background-color: #f4f4f4; padding: 20px 0; }
+            .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }
+            .header { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; padding: 40px 30px; text-align: center; }
+            .header h1 { margin: 10px 0 0 0; font-size: 24px; font-weight: 600; }
             .icon { font-size: 48px; margin-bottom: 10px; }
+            .content { padding: 40px 30px; background-color: #ffffff; }
+            .content p { margin: 15px 0; color: #374151; }
+            .info-box { background: #f9fafb; padding: 20px; border-left: 4px solid #2563eb; margin: 25px 0; border-radius: 4px; }
+            .info-box h3 { margin: 0 0 15px 0; color: #1f2937; font-size: 16px; }
+            .info-box p { margin: 8px 0; color: #4b5563; }
+            .button { display: inline-block; padding: 14px 32px; background: #2563eb; color: white !important; text-decoration: none; border-radius: 6px; margin: 25px 0; font-weight: 500; }
+            .button:hover { background: #1d4ed8; }
+            .footer { background: #f9fafb; padding: 30px; text-align: center; color: #6b7280; font-size: 13px; border-top: 1px solid #e5e7eb; }
+            .footer p { margin: 8px 0; }
+            .footer a { color: #2563eb; text-decoration: none; }
+            .alert-box { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px; }
+            .alert-box strong { color: #92400e; }
+            ul { margin: 10px 0; padding-left: 25px; }
+            ul li { margin: 8px 0; color: #4b5563; }
+            @media only screen and (max-width: 600px) {
+                .content, .header, .footer { padding: 20px !important; }
+            }
         </style>
     </head>
     <body>
-        <div class='container'>
-            <div class='header'>
-                <div class='icon'>✅</div>
-                <h1>Vote Enregistré avec Succès</h1>
-            </div>
-            <div class='content'>
-                <p>Bonjour <strong>" . $user['full_name'] . "</strong>,</p>
-                
-                <p>Nous vous confirmons que votre vote pour l'élection <strong>" . $election_title . "</strong> a été enregistré avec succès.</p>
-                
-                <div class='info-box'>
-                    <h3>📊 Détails de votre participation</h3>
-                    <p><strong>Positions votées :</strong><br>" . $positions_list . "</p>
-                    <p><strong>Date et heure :</strong> " . date('d/m/Y à H:i') . "</p>
+        <div class='email-wrapper'>
+            <div class='container'>
+                <div class='header'>
+                    <div class='icon'>✅</div>
+                    <h1>Vote Enregistré avec Succès</h1>
                 </div>
-                
-                <p><strong>⚠️ Important :</strong></p>
-                <ul>
-                    <li>Votre vote est <strong>définitif et ne peut pas être modifié</strong></li>
-                    <li>Les résultats seront publiés après la clôture du scrutin</li>
-                    <li>Vous recevrez une notification lorsque les résultats seront disponibles</li>
-                </ul>
-                
-                <p>Merci de votre participation à la vie démocratique de SIGMA Alumni !</p>
-                
-                <center>
-                    <a href='" . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://" . ($_SERVER['HTTP_HOST'] ?? 'localhost') . "/Sigma-Website/elections.php' class='button'>Voir les détails de l'élection</a>
-                </center>
-            </div>
-            <div class='footer'>
-                <p>Cet email a été envoyé automatiquement par SIGMA Alumni</p>
-                <p>Si vous n'avez pas voté, veuillez contacter immédiatement l'administration</p>
+                <div class='content'>
+                    <p>Bonjour <strong>" . htmlspecialchars($user['full_name'], ENT_QUOTES, 'UTF-8') . "</strong>,</p>
+                    
+                    <p>Nous vous confirmons que votre vote pour l'élection <strong>" . htmlspecialchars($election_title, ENT_QUOTES, 'UTF-8') . "</strong> a été enregistré avec succès.</p>
+                    
+                    <div class='info-box'>
+                        <h3>📊 Détails de votre participation</h3>
+                        <p><strong>Positions votées :</strong><br>" . htmlspecialchars($positions_list, ENT_QUOTES, 'UTF-8') . "</p>
+                        <p><strong>Date et heure :</strong> " . date('d/m/Y à H:i') . "</p>
+                    </div>
+                    
+                    <div class='alert-box'>
+                        <p><strong>⚠️ Important</strong></p>
+                        <ul>
+                            <li>Votre vote est <strong>définitif et ne peut pas être modifié</strong></li>
+                            <li>Les résultats seront publiés après la clôture du scrutin</li>
+                            <li>Vous recevrez une notification lorsque les résultats seront disponibles</li>
+                        </ul>
+                    </div>
+                    
+                    <p>Merci de votre participation à la vie démocratique de SIGMA Alumni.</p>
+                    
+                    <center>
+                        <a href='{$base_url}/elections.php' class='button'>Voir les détails de l'élection</a>
+                    </center>
+                </div>
+                <div class='footer'>
+                    <p><strong>SIGMA Alumni</strong> - Communauté des anciens élèves</p>
+                    <p>Cet email a été envoyé automatiquement suite à votre vote.</p>
+                    <p>Si vous n'avez pas voté, veuillez contacter immédiatement l'administration.</p>
+                    <p style='margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;'>
+                        <a href='{$base_url}/settings.php'>Gérer vos préférences de notification</a>
+                    </p>
+                </div>
             </div>
         </div>
     </body>
     </html>
     ";
     
-    $altBody = "Bonjour {$user['full_name']},\n\nVotre vote pour l'élection \"{$election_title}\" a été enregistré avec succès.\n\nPositions votées : {$positions_list}\nDate : " . date('d/m/Y à H:i') . "\n\nVotre vote est définitif et ne peut pas être modifié.\n\nMerci de votre participation !\n\nSIGMA Alumni";
+    // Version texte améliorée pour éviter les filtres anti-spam
+    $altBody = "Bonjour {$user['full_name']},\n\n" .
+               "Nous vous confirmons que votre vote pour l'élection \"{$election_title}\" a été enregistré avec succès.\n\n" .
+               "DÉTAILS DE VOTRE PARTICIPATION\n" .
+               "Positions votées : {$positions_list}\n" .
+               "Date et heure : " . date('d/m/Y à H:i') . "\n\n" .
+               "IMPORTANT\n" .
+               "- Votre vote est définitif et ne peut pas être modifié\n" .
+               "- Les résultats seront publiés après la clôture du scrutin\n" .
+               "- Vous recevrez une notification lorsque les résultats seront disponibles\n\n" .
+               "Merci de votre participation à la vie démocratique de SIGMA Alumni !\n\n" .
+               "---\n" .
+               "SIGMA Alumni - Communauté des anciens élèves\n" .
+               "Si vous n'avez pas voté, veuillez contacter immédiatement l'administration.\n" .
+               "Pour gérer vos préférences de notification : " . 
+               (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://" . 
+               ($_SERVER['HTTP_HOST'] ?? 'localhost') . "/Sigma-Website/settings.php";
     
     $email_sent = sendEmail($user['email'], $user['full_name'], $subject, $body, $altBody);
     
@@ -220,50 +325,102 @@ function sendResultsNotificationEmails($election_id) {
             $failed_count++;
             continue;
         }
+        
+        $base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://" . ($_SERVER['HTTP_HOST'] ?? 'localhost') . "/Sigma-Website";
+        
         $body = "
         <!DOCTYPE html>
-        <html>
+        <html lang='fr'>
         <head>
             <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Résultats d'élection</title>
             <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-                .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-                .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }
-                .button { display: inline-block; padding: 12px 30px; background: #10b981; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+                .email-wrapper { width: 100%; background-color: #f4f4f4; padding: 20px 0; }
+                .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }
+                .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 40px 30px; text-align: center; }
+                .header h1 { margin: 10px 0 0 0; font-size: 24px; font-weight: 600; }
                 .icon { font-size: 48px; margin-bottom: 10px; }
+                .content { padding: 40px 30px; background-color: #ffffff; }
+                .content p { margin: 15px 0; color: #374151; }
+                .button { display: inline-block; padding: 14px 32px; background: #10b981; color: white !important; text-decoration: none; border-radius: 6px; margin: 25px 0; font-weight: 500; }
+                .button:hover { background: #059669; }
+                .footer { background: #f9fafb; padding: 30px; text-align: center; color: #6b7280; font-size: 13px; border-top: 1px solid #e5e7eb; }
+                .footer p { margin: 8px 0; }
+                .footer a { color: #10b981; text-decoration: none; }
+                .highlight-box { background: #ecfdf5; border: 1px solid #10b981; padding: 20px; margin: 25px 0; border-radius: 6px; text-align: center; }
+                ul { margin: 10px 0; padding-left: 25px; }
+                ul li { margin: 8px 0; color: #4b5563; }
+                @media only screen and (max-width: 600px) {
+                    .content, .header, .footer { padding: 20px !important; }
+                }
             </style>
         </head>
         <body>
-            <div class='container'>
-                <div class='header'>
-                    <div class='icon'>📊</div>
-                    <h1>Résultats de l'Élection Disponibles</h1>
-                </div>
-                <div class='content'>
-                    <p>Bonjour <strong>" . $user['full_name'] . "</strong>,</p>
-                    
-                    <p>Les résultats de l'élection <strong>" . $election['title'] . "</strong> sont maintenant disponibles !</p>
-                    
-                    <p>Vous pouvez consulter les résultats complets, incluant la répartition des votes par position et les candidats élus.</p>
-                    
-                    <center>
-                        <a href='" . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://" . ($_SERVER['HTTP_HOST'] ?? 'localhost') . "/Sigma-Website/elections.php#results' class='button'>Voir les Résultats</a>
-                    </center>
-                    
-                    <p>Merci d'avoir participé à cette élection et contribué à la vie démocratique de SIGMA Alumni.</p>
-                </div>
-                <div class='footer'>
-                    <p>Cet email a été envoyé automatiquement par SIGMA Alumni</p>
-                    <p>Pour toute question, contactez l'administration</p>
+            <div class='email-wrapper'>
+                <div class='container'>
+                    <div class='header'>
+                        <div class='icon'>📊</div>
+                        <h1>Résultats de l'Élection Disponibles</h1>
+                    </div>
+                    <div class='content'>
+                        <p>Bonjour <strong>" . htmlspecialchars($user['full_name'], ENT_QUOTES, 'UTF-8') . "</strong>,</p>
+                        
+                        <p>Les résultats de l'élection <strong>" . htmlspecialchars($election['title'], ENT_QUOTES, 'UTF-8') . "</strong> sont maintenant disponibles.</p>
+                        
+                        <div class='highlight-box'>
+                            <p style='margin: 0; color: #065f46; font-size: 16px;'>
+                                <strong>🎉 Le dépouillement est terminé</strong>
+                            </p>
+                            <p style='margin: 10px 0 0 0; color: #047857;'>
+                                Découvrez les résultats complets et les candidats élus
+                            </p>
+                        </div>
+                        
+                        <p>Vous pouvez consulter :</p>
+                        <ul>
+                            <li>La répartition complète des votes par position</li>
+                            <li>Les candidats élus pour chaque poste</li>
+                            <li>Les statistiques de participation</li>
+                        </ul>
+                        
+                        <center>
+                            <a href='{$base_url}/elections.php#results' class='button'>Voir les Résultats Complets</a>
+                        </center>
+                        
+                        <p>Merci d'avoir participé à cette élection et contribué à la vie démocratique de SIGMA Alumni.</p>
+                    </div>
+                    <div class='footer'>
+                        <p><strong>SIGMA Alumni</strong> - Communauté des anciens élèves</p>
+                        <p>Cet email a été envoyé automatiquement suite à la publication des résultats.</p>
+                        <p>Pour toute question, contactez l'administration.</p>
+                        <p style='margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;'>
+                            <a href='{$base_url}/settings.php'>Gérer vos préférences de notification</a>
+                        </p>
+                    </div>
                 </div>
             </div>
         </body>
         </html>
         ";
         
-        $altBody = "Bonjour {$user['full_name']},\n\nLes résultats de l'élection \"{$election['title']}\" sont maintenant disponibles.\n\nConsultez-les sur : " . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://" . ($_SERVER['HTTP_HOST'] ?? 'localhost') . "/Sigma-Website/elections.php#results\n\nMerci de votre participation !\n\nSIGMA Alumni";
+        // Version texte améliorée pour éviter les filtres anti-spam
+        $altBody = "Bonjour {$user['full_name']},\n\n" .
+                   "Les résultats de l'élection \"{$election['title']}\" sont maintenant disponibles !\n\n" .
+                   "Vous pouvez consulter les résultats complets, incluant la répartition des votes " .
+                   "par position et les candidats élus.\n\n" .
+                   "Lien vers les résultats : " . 
+                   (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://" . 
+                   ($_SERVER['HTTP_HOST'] ?? 'localhost') . "/Sigma-Website/elections.php#results\n\n" .
+                   "Merci d'avoir participé à cette élection et contribué à la vie démocratique " .
+                   "de SIGMA Alumni.\n\n" .
+                   "---\n" .
+                   "SIGMA Alumni - Communauté des anciens élèves\n" .
+                   "Pour toute question, contactez l'administration\n" .
+                   "Pour gérer vos préférences : " . 
+                   (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://" . 
+                   ($_SERVER['HTTP_HOST'] ?? 'localhost') . "/Sigma-Website/settings.php";
         
         if (sendEmail($user['email'], $user['full_name'], $subject, $body, $altBody)) {
             // Logger l'envoi dans la base de données
