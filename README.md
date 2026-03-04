@@ -230,13 +230,13 @@ define('ENABLE_CSRF', true);
 ```
 
 ### Configuration des uploads
-Voir [CONFIG_VIDEO_UPLOAD.md](CONFIG_VIDEO_UPLOAD.md) pour :
+Voir [CONFIG_VIDEO_UPLOAD.md](docs/CONFIG_VIDEO_UPLOAD.md) pour :
 - Limites de taille des fichiers
 - Types MIME autorisés
 - Permissions des dossiers
 
 ### Configuration email
-Voir [EMAIL_SYSTEM_DOCS.md](EMAIL_SYSTEM_DOCS.md) pour :
+Voir [EMAIL_SYSTEM_DOCS.md](docs/EMAIL_SYSTEM_DOCS.md) pour :
 - Configuration SMTP
 - Templates d'emails
 - Système de files d'attente
@@ -364,23 +364,25 @@ Sigma-Website/
 
 ## 📚 Documentation
 
+📂 **Toute la documentation est disponible dans le dossier [docs/](docs/)** - [Voir l'index complet](docs/INDEX.md)
+
 ### Guides d'utilisation
-- [📋 Fonctionnalités complètes](FONCTIONNALITES.md) - Liste détaillée de
-- [🎓 Tutoriel interactif](TUTORIEL_README.md) - Documentation du système de tutoriel Driver.js
-- [🎂 Automatisation CRON](CONFIGURATION_CRON.md) - Configuration des emails automatiques toutes les fonctionnalités
-- [💬 Système de messagerie](MESSAGERIE_README.md) - Guide du système de messagerie WebSocket
-- [🔔 Système de notifications](NOTIFICATIONS_README.md) - Documentation des notifications
-- [🔍 Recherche avancée](RECHERCHE_AVANCEE_README.md) - Guide de la recherche
-- [📖 Installation tutoriel](INSTALLATION_TUTORIEL.md) - Installation du système de tutoriel interactif dans l'annuaire
-- [🎨 Thèmes festifs](THEMES_FESTIFS.md) - Gestion des thèmes saisonniers
+- [📋 Fonctionnalités complètes](docs/FONCTIONNALITES.md) - Liste détaillée de toutes les fonctionnalités
+- [🎓 Tutoriel interactif](docs/TUTORIEL_README.md) - Documentation du système de tutoriel Driver.js
+- [🎂 Automatisation CRON](docs/CONFIGURATION_CRON.md) - Configuration des emails automatiques
+- [💬 Système de messagerie](docs/MESSAGERIE_README.md) - Guide du système de messagerie WebSocket
+- [🔔 Système de notifications](docs/NOTIFICATIONS_README.md) - Documentation des notifications
+- [🔍 Recherche avancée](docs/RECHERCHE_AVANCEE_README.md) - Guide de la recherche
+- [📖 Installation tutoriel](docs/INSTALLATION_TUTORIEL.md) - Installation du système de tutoriel interactif
+- [🎨 Thèmes festifs](docs/THEMES_FESTIFS.md) - Gestion des thèmes saisonniers
 
 ### Guides d'installation
-- [📦 Installation SQL](GUIDE_INSTALLATION_SQL.md) - Installation complète de la base de données
-- [📧 Configuration email](EMAIL_SYSTEM_DOCS.md) - Configuration du système d'envoi d'emails
-- [🎥 Upload vidéo](CONFIG_VIDEO_UPLOAD.md) - Configuration des uploads vidéo
+- [📦 Installation SQL](docs/GUIDE_INSTALLATION_SQL.md) - Installation complète de la base de données
+- [📧 Configuration email](docs/EMAIL_SYSTEM_DOCS.md) - Configuration du système d'envoi d'emails
+- [🎥 Upload vidéo](docs/CONFIG_VIDEO_UPLOAD.md) - Configuration des uploads vidéo
 
 ### Développement
-- [🚀 Améliorations suggérées](AMELIORATIONS_SUGGEREES.md) - Roadmap et fonctionnalités futures
+- [🚀 Améliorations suggérées](docs/AMELIORATIONS_SUGGEREES.md) - Roadmap et fonctionnalités futures
 
 ---
 
@@ -437,7 +439,7 @@ git push origin feature/ma-fonctionnalite
 - [ ] Groupes et communautés
 - [ ] Dashboard avec analytics
 
-Voir [AMELIORATIONS_SUGGEREES.md](AMELIORATIONS_SUGGEREES.md) pour la roadmap complète.
+Voir [AMELIORATIONS_SUGGEREES.md](docs/AMELIORATIONS_SUGGEREES.md) pour la roadmap complète.
 
 ---
 
