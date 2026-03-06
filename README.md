@@ -366,22 +366,27 @@ Sigma-Website/
 
 📂 **Toute la documentation est disponible dans le dossier [docs/](docs/)** - [Voir l'index complet](docs/INDEX.md)
 
-### Guides d'utilisation
+### 🚀 Déploiement & Installation
+- [🌐 Guide de déploiement](docs/DEPLOYMENT.md) - 🆕 Comparatif XAMPP / InfinityFree / Hébergement payant
+- [📦 Installation SQL](docs/GUIDE_INSTALLATION_SQL.md) - Installation complète de la base de données
+- [📖 Installation tutoriel](docs/INSTALLATION_TUTORIEL.md) - Installation du système de tutoriel interactif
+
+### 📧 Système d'Emails
+- [📧 Configuration email](docs/EMAIL_SYSTEM_DOCS.md) - Architecture et configuration SMTP (PHPMailer)
+- [🧪 Tests des emails](docs/TESTS_EMAILS.md) - Procédures de test et débogage
+- [📨 Délivrabilité emails](docs/GUIDE_DELIVRABILITE_EMAILS.md) - Configuration SPF/DKIM/DMARC
+- [🎂 Automatisation CRON](docs/CONFIGURATION_CRON.md) - Configuration des emails automatiques (anniversaires, nouvel an)
+
+### 💬 Fonctionnalités
 - [📋 Fonctionnalités complètes](docs/FONCTIONNALITES.md) - Liste détaillée de toutes les fonctionnalités
 - [🎓 Tutoriel interactif](docs/TUTORIEL_README.md) - Documentation du système de tutoriel Driver.js
-- [🎂 Automatisation CRON](docs/CONFIGURATION_CRON.md) - Configuration des emails automatiques
 - [💬 Système de messagerie](docs/MESSAGERIE_README.md) - Guide du système de messagerie WebSocket
 - [🔔 Système de notifications](docs/NOTIFICATIONS_README.md) - Documentation des notifications
-- [🔍 Recherche avancée](docs/RECHERCHE_AVANCEE_README.md) - Guide de la recherche
-- [📖 Installation tutoriel](docs/INSTALLATION_TUTORIEL.md) - Installation du système de tutoriel interactif
+- [🔍 Recherche avancée](docs/RECHERCHE_AVANCEE_README.md) - Guide de la recherche avancée
 - [🎨 Thèmes festifs](docs/THEMES_FESTIFS.md) - Gestion des thèmes saisonniers
 
-### Guides d'installation
-- [📦 Installation SQL](docs/GUIDE_INSTALLATION_SQL.md) - Installation complète de la base de données
-- [📧 Configuration email](docs/EMAIL_SYSTEM_DOCS.md) - Configuration du système d'envoi d'emails
+### 🔧 Configuration
 - [🎥 Upload vidéo](docs/CONFIG_VIDEO_UPLOAD.md) - Configuration des uploads vidéo
-
-### Développement
 - [🚀 Améliorations suggérées](docs/AMELIORATIONS_SUGGEREES.md) - Roadmap et fonctionnalités futures
 
 ---

@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Check if user already has a complete profile
-    $stmt = $conn->prepare("SELECT full_name, birth_date, bac_year, studies FROM users WHERE email = ?");
+    $stmt = $conn->prepare("SELECT full_name, birth_date, bac_year, studies, tutorial_completed FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -72,7 +72,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($user && !empty($user['full_name']) && !empty($user['birth_date']) && !empty($user['bac_year']) && !empty($user['studies'])) {
         $_SESSION['error'] = "Votre profil est déjà complet.";
-        header("Location: dashboard.php");
+        // Check if tutorial should be shown
+        if (isset($user['tutorial_completed']) && $user['tutorial_completed'] == 0) {
+            header("Location: dashboard.php?tutorial=1");
+        } else {
+            header("Location: dashboard.php");
+        }
         exit;
     }
 
@@ -237,6 +242,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                    "SIGMA Alumni - Communauté des anciens élèves\n" .
                    "Restons connectés et construisons ensemble l'avenir.";
         
+        // Send welcome email
         if (sendEmail($email, $full_name, $subject, $body, $altBody)) {
             $_SESSION['success'] = "Profil créé avec succès ! Un e-mail de bienvenue a été envoyé.";
         } else {
@@ -311,10 +317,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         "Vous pouvez consulter et gérer ce profil depuis l'interface d'administration.\n\n" .
                         "Notification automatique du système SIGMA Alumni";
         
-        // Envoyer sans interrompre le flux si ça échoue
+        // Send admin notification
         sendEmail('gojomeh137@gmail.com', 'Administrateur', $admin_subject, $admin_body, $admin_altBody);
 
-        header("Location: dashboard.php");
+        // Check if this is the first connection (tutorial not completed)
+        $stmt = $conn->prepare("SELECT tutorial_completed FROM users WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user_tutorial = $result->fetch_assoc();
+        $stmt->close();
+
+        // Redirect with tutorial parameter if first time
+        if ($user_tutorial && isset($user_tutorial['tutorial_completed']) && $user_tutorial['tutorial_completed'] == 0) {
+            header("Location: dashboard.php?tutorial=1");
+        } else {
+            header("Location: dashboard.php");
+        }
         exit;
     } else {
         $_SESSION['error'] = "Erreur lors de la création du profil.";

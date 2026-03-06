@@ -74,24 +74,6 @@ function startTutorial() {
                 }
             },
             {
-                element: '.message-badge, #message-badge',
-                popover: {
-                    title: '🔔 Badge de notifications',
-                    description: 'Ce badge vous indique le nombre de nouveaux messages non lus. Restez connecté avec votre réseau !',
-                    side: "bottom",
-                    align: 'center'
-                }
-            },
-            {
-                element: '.menu-toggle',
-                popover: {
-                    title: '📱 Menu Mobile',
-                    description: 'Sur mobile, utilisez ce bouton pour accéder au menu complet de navigation.',
-                    side: "bottom",
-                    align: 'end'
-                }
-            },
-            {
                 popover: {
                     title: '🎓 Autres fonctionnalités',
                     description: 'Le site offre également : Yearbook (annuaire complet), Élections, Souvenirs (partage de photos), Album et bien plus. Explorez le menu pour tout découvrir !',
