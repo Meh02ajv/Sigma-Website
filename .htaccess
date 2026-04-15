@@ -1,0 +1,77 @@
+# Configuration pour les uploads de gros fichiers (vidéos jusqu'à 2GB)
+# NOTE InfinityFree: les directives php_value en .htaccess provoquent HTTP 500.
+# Configurez ces valeurs dans .user.ini si nécessaire.
+
+# Options générales
+Options -Indexes
+DirectoryIndex index.php index.html accueil.php
+
+# Protection des fichiers sensibles
+<FilesMatch "\.(log|sql|ini|env)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+<FilesMatch "^(config\.php|composer\.(json|lock)|README\.md|CHANGELOG\.md)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Headers de sécurité pour SEO et protection
+<IfModule mod_headers.c>
+    # Protection XSS
+    Header set X-XSS-Protection "1; mode=block"
+    # Prévention du clickjacking
+    Header set X-Frame-Options "SAMEORIGIN"
+    # Prévention du sniffing MIME
+    Header set X-Content-Type-Options "nosniff"
+    # Referrer policy pour la vie privée
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Compression GZIP pour améliorer les performances et SEO
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Cache pour les médias (améliore le score PageSpeed)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType video/mp4 "access plus 1 year"
+    ExpiresByType video/webm "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
+
+# Redirection www vers non-www (optionnel, à activer si nécessaire)
+# RewriteEngine On
+# RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+# RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+# Amélioration SEO - URL propres
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Compatibilite hebergement: redirige /Sigma-Website/... vers /...
+    RewriteRule ^Sigma-Website/(.*)$ $1 [L,QSA,NC]
+    # Bloquer l'accès HTTP aux dossiers internes
+    RewriteRule ^(sessions|vendor|sql|docs)/ - [F,L,NC]
+    # Forcer HTTPS (décommenter si SSL actif)
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>

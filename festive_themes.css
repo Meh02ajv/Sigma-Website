@@ -1,0 +1,362 @@
+/* ========================================
+   THÈMES FESTIFS - SIGMA ALUMNI
+   ======================================== */
+
+/* ========================================
+   THÈME NOËL / FIN D'ANNÉE
+   ======================================== */
+
+body.theme-christmas {
+    --primary-blue: #c41e3a;  /* Rouge Noël */
+    --dark-blue: #165b33;     /* Vert sapin */
+    --light-blue: #fff5e6;    /* Beige doux */
+    --accent-gold: #d4af37;   /* Or festif */
+}
+
+/* Overlay de flocons de neige */
+body.theme-christmas::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    background-image: 
+        radial-gradient(2px 2px at 20% 30%, white, transparent),
+        radial-gradient(2px 2px at 60% 70%, white, transparent),
+        radial-gradient(1px 1px at 50% 50%, white, transparent),
+        radial-gradient(1px 1px at 80% 10%, white, transparent),
+        radial-gradient(2px 2px at 90% 60%, white, transparent),
+        radial-gradient(1px 1px at 33% 80%, white, transparent),
+        radial-gradient(1px 1px at 15% 55%, white, transparent);
+    background-size: 200% 200%;
+    animation: snowfall 20s linear infinite;
+    opacity: 0.6;
+}
+
+@keyframes snowfall {
+    0% { background-position: 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%; }
+    100% { background-position: 10% 100%, -10% 100%, 20% 100%, -20% 100%, 15% 100%, -15% 100%, 25% 100%; }
+}
+
+/* Header Noël */
+.theme-christmas header {
+    background: linear-gradient(135deg, #c41e3a 0%, #165b33 100%);
+    border-bottom: 3px solid #d4af37;
+}
+
+/* Étoiles dorées sur le header */
+.theme-christmas header::after {
+    content: '✨ ⭐ ✨';
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 20px;
+    animation: twinkle 2s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+/* Boutons Noël */
+.theme-christmas .btn,
+.theme-christmas .action-card,
+.theme-christmas button[type="submit"] {
+    background: linear-gradient(135deg, #c41e3a 0%, #a01729 100%);
+    border: 2px solid #d4af37;
+    transition: all 0.3s ease;
+}
+
+.theme-christmas .btn:hover,
+.theme-christmas .action-card:hover,
+.theme-christmas button[type="submit"]:hover {
+    background: linear-gradient(135deg, #165b33 0%, #0d3d20 100%);
+    border-color: #fff;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+}
+
+/* Cards avec bordure dorée */
+.theme-christmas .content-section,
+.theme-christmas .profile-card,
+.theme-christmas .user-info {
+    border: 2px solid #d4af37;
+    box-shadow: 0 4px 20px rgba(196, 30, 58, 0.1);
+}
+
+/* Footer Noël */
+.theme-christmas footer {
+    background: linear-gradient(135deg, #165b33 0%, #0d3d20 100%);
+    border-top: 3px solid #d4af37;
+}
+
+/* Houx décoratif */
+.theme-christmas .dashboard-hero::before,
+.theme-christmas .hero-section::before {
+    content: '🎄';
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 40px;
+    animation: sway 3s ease-in-out infinite;
+}
+
+.theme-christmas .dashboard-hero::after,
+.theme-christmas .hero-section::after {
+    content: '🎄';
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 40px;
+    animation: sway 3s ease-in-out infinite reverse;
+}
+
+@keyframes sway {
+    0%, 100% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg); }
+}
+
+/* Guirlandes lumineuses */
+.theme-christmas header nav::before {
+    content: '💡🔴🟢🟡💡🔴🟢🟡💡';
+    display: block;
+    text-align: center;
+    font-size: 12px;
+    margin-bottom: 10px;
+    animation: blink 1s linear infinite;
+}
+
+@keyframes blink {
+    0%, 50%, 100% { opacity: 1; }
+    25%, 75% { opacity: 0.4; }
+}
+
+
+/* ========================================
+   THÈME INDÉPENDANCE DU TOGO
+   ======================================== */
+
+body.theme-independence {
+    --primary-blue: #006a4e;   /* Vert Togo */
+    --dark-blue: #ffcc00;      /* Jaune Togo */
+    --light-blue: #fff9e6;     /* Jaune clair */
+    --accent-red: #d21034;     /* Rouge Togo */
+}
+
+/* Overlay avec étoile blanche */
+body.theme-independence::before {
+    content: '⭐';
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 60px;
+    color: white;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    pointer-events: none;
+    z-index: 9999;
+    animation: star-pulse 2s ease-in-out infinite;
+}
+
+@keyframes star-pulse {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.2); }
+}
+
+/* Header aux couleurs du Togo */
+.theme-independence header {
+    background: linear-gradient(to bottom,
+        #006a4e 0%,
+        #006a4e 20%,
+        #ffcc00 20%,
+        #ffcc00 40%,
+        #006a4e 40%,
+        #006a4e 60%,
+        #ffcc00 60%,
+        #ffcc00 80%,
+        #006a4e 80%,
+        #006a4e 100%
+    );
+    border-left: 80px solid #d21034;
+    position: relative;
+}
+
+/* Étoile blanche sur le rectangle rouge */
+.theme-independence header::before {
+    content: '⭐';
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 40px;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Boutons aux couleurs nationales */
+.theme-independence .btn,
+.theme-independence .action-card,
+.theme-independence button[type="submit"] {
+    background: linear-gradient(135deg, #006a4e 0%, #004d38 100%);
+    border: 3px solid #ffcc00;
+    transition: all 0.3s ease;
+}
+
+.theme-independence .btn:hover,
+.theme-independence .action-card:hover,
+.theme-independence button[type="submit"]:hover {
+    background: linear-gradient(135deg, #d21034 0%, #a00d28 100%);
+    border-color: white;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(255, 204, 0, 0.4);
+}
+
+/* Cards avec bordure tricolore */
+.theme-independence .content-section,
+.theme-independence .profile-card,
+.theme-independence .user-info {
+    border-top: 4px solid #006a4e;
+    border-bottom: 4px solid #006a4e;
+    border-left: 4px solid #ffcc00;
+    border-right: 4px solid #d21034;
+    box-shadow: 0 4px 20px rgba(0, 106, 78, 0.15);
+}
+
+/* Footer tricolore */
+.theme-independence footer {
+    background: linear-gradient(to right,
+        #006a4e 0%,
+        #006a4e 33%,
+        #ffcc00 33%,
+        #ffcc00 66%,
+        #d21034 66%,
+        #d21034 100%
+    );
+    color: white;
+}
+
+.theme-independence footer * {
+    color: white !important;
+}
+
+/* Message patriotique */
+.theme-independence .dashboard-hero::after,
+.theme-independence .hero-section::after {
+    content: '🇹🇬 Vive le Togo libre et indépendant! 🇹🇬';
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #006a4e;
+    text-shadow: 2px 2px 4px rgba(255, 204, 0, 0.3);
+    animation: patriotic-wave 3s ease-in-out infinite;
+}
+
+@keyframes patriotic-wave {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Confettis tricolores */
+.theme-independence body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9998;
+    background-image: 
+        radial-gradient(circle, #006a4e 2px, transparent 2px),
+        radial-gradient(circle, #ffcc00 2px, transparent 2px),
+        radial-gradient(circle, #d21034 2px, transparent 2px);
+    background-size: 50px 50px, 80px 80px, 60px 60px;
+    background-position: 0 0, 20px 20px, 40px 40px;
+    animation: confetti-fall 15s linear infinite;
+    opacity: 0.3;
+}
+
+@keyframes confetti-fall {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+}
+
+/* Titres avec effet patriotique */
+.theme-independence h1,
+.theme-independence h2,
+.theme-independence h3 {
+    background: linear-gradient(90deg, #006a4e, #ffcc00, #d21034);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: bold;
+}
+
+/* Animation du drapeau */
+.theme-independence .logo,
+.theme-independence .profile-avatar {
+    animation: flag-wave 3s ease-in-out infinite;
+}
+
+@keyframes flag-wave {
+    0%, 100% { transform: perspective(400px) rotateY(0deg); }
+    50% { transform: perspective(400px) rotateY(10deg); }
+}
+
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .theme-christmas header::after {
+        font-size: 16px;
+        right: 10px;
+    }
+    
+    .theme-christmas .dashboard-hero::before,
+    .theme-christmas .dashboard-hero::after,
+    .theme-christmas .hero-section::before,
+    .theme-christmas .hero-section::after {
+        font-size: 30px;
+    }
+    
+    .theme-independence header {
+        border-left-width: 50px;
+    }
+    
+    .theme-independence header::before {
+        font-size: 30px;
+        left: 10px;
+    }
+    
+    body.theme-independence::before {
+        font-size: 40px;
+    }
+    
+    .theme-independence .dashboard-hero::after,
+    .theme-independence .hero-section::after {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .theme-christmas header nav::before {
+        font-size: 10px;
+    }
+    
+    .theme-independence header {
+        border-left-width: 30px;
+    }
+    
+    .theme-independence header::before {
+        font-size: 20px;
+        left: 5px;
+    }
+}

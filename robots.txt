@@ -1,0 +1,34 @@
+# robots.txt for SIGMA Alumni Website
+
+User-agent: *
+
+# Allow access to main pages
+Allow: /
+Allow: /accueil.php
+Allow: /yearbook_public.php
+Allow: /contact.php
+Allow: /css/
+Allow: /js/
+Allow: /img/
+
+# Disallow private areas
+Disallow: /admin.php
+Disallow: /admin_login.php
+Disallow: /dashboard.php
+Disallow: /settings.php
+Disallow: /messaging.php
+Disallow: /notifications.php
+Disallow: /mod_prof.php
+Disallow: /update_profile.php
+Disallow: /elections.php
+Disallow: /submit_*
+Disallow: /delete_*
+Disallow: /get_*
+Disallow: /mark_*
+Disallow: /sessions/
+Disallow: /uploads/
+Disallow: /vendor/
+Disallow: /logs/
+
+# Sitemap location
+Sitemap: https://sigmawebsite.rf.gd/sitemap.xml
