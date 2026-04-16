@@ -109,7 +109,38 @@ Pour la sécurité des données (mots de passe, emails), le HTTPS est **obligato
 
 ---
 
-## 📁 Fichiers à Déployer
+## � Liste détaillée des fichiers pour le déploiement
+
+Pour que le site fonctionne correctement sur votre hébergement, vous devez transférer **tous les fichiers à la racine**, à l'exception des fichiers de configuration Git et des outils de développement.
+
+### ✅ Fichiers et Dossiers Indispensables
+*   **Tous les fichiers `.php` à la racine** (accueil.php, login.php, config.php, etc.)
+*   **`config.php`** : Assurez-vous d'avoir mis à jour les accès Base de Données et SMTP (voir section Configuration).
+*   **`css/`** : Contient tous les styles (y compris les thèmes festifs).
+*   **`js/`** : Contient les scripts JavaScript (messagerie, tutoriel, etc.).
+*   **`img/`** : Contient les logos, favicons et images statiques de l'interface.
+*   **`includes/`** : Scripts PHP essentiels (notifications, gestion des élections).
+*   **`vendor/`** : Dépendances PHP (PHPMailer, etc.). **Ne pas oublier ce dossier !**
+*   **`.htaccess`** : Gère la sécurité, le HTTPS et les permissions d'upload.
+*   **`sql/full_schema.sql`** : À importer dans votre base de données avant le premier lancement.
+
+### 📁 Dossiers de Stockage & Upload (Permissions CHMOD 755/775)
+Ces dossiers doivent exister sur le serveur pour permettre le téléchargement de fichiers et la gestion des sessions :
+*   **`uploads/`** (contenant `candidates/`, `events/`, `news/`, `videos/`)
+*   **`souvenirs_pic/`** (contenant l'album photo par année)
+*   **`sessions/`** : Pour stocker les sessions PHP de manière sécurisée hors du répertoire public.
+*   **`logs/`** : Pour enregistrer les erreurs PHP et système.
+
+### ❌ Fichiers à ignorer (Non nécessaires au fonctionnement)
+*   `.git/`, `.gitignore` : Uniquement pour le contrôle de version.
+*   `composer.lock`, `composer.json` : Utilisés pour la gestion des dépendances en développement.
+*   `README.md`, `docs/` : Uniquement pour la documentation.
+*   `config.example.php` : Modèle de configuration.
+*   Fichiers `.bat` (ex: `fix_sessions_permissions.bat`) : Uniquement pour Windows/XAMPP.
+
+---
+
+## �📁 Fichiers à Déployer
 
 ### Fichiers Essentiels
 ```
