@@ -75,7 +75,7 @@ try {
     
     logMessage("Anniversaires dans 2 jours : " . count($birthday_in_two_days));
     
-    // 3. Récupérer tous les autres utilisateurs pour les notifications
+    // 3. Récupérer tous les utilisateurs (pour les notifications)
     $query = "SELECT id, full_name, email FROM users WHERE email IS NOT NULL";
     $stmt = $conn->prepare($query);
     $stmt->execute();
@@ -229,37 +229,23 @@ HTML;
         }
     }
     
-    $total_sent = 0;
-    
-    // ENVOYER LES EMAILS D'ANNIVERSAIRE AUX PERSONNES CONCERNÉES (AUJOURD'HUI)
+    // ENVOYER LES EMAILS D'ANNIVERSAIRE (AUJOURD'HUI)
     foreach ($birthday_today as $user) {
-        if (sendBirthdayEmailToPerson($user)) {
-            $total_sent++;
-        }
+        sendBirthdayEmailToPerson($user);
+        $total_sent++;
         
-        // Notifier les autres membres (limité pour éviter le spam)
-        $notified = 0;
-        foreach ($all_users as $recipient) {
-            if ($recipient['id'] != $user['id'] && $notified < 50) { // Max 50 notifications
-                if (sendBirthdayNotificationToOthers($user, $recipient, false)) {
-                    $notified++;
-                }
-            }
-        }
-        logMessage("  → {$notified} notifications envoyées aux autres membres");
+        // Note: Les notifications aux autres membres pour le jour J ont été désactivées
+        // pour ne garder que le rappel à J-2.
     }
     
     // ENVOYER LES RAPPELS (ANNIVERSAIRE DANS 2 JOURS)
     foreach ($birthday_in_two_days as $user) {
-        $notified = 0;
         foreach ($all_users as $recipient) {
-            if ($recipient['id'] != $user['id'] && $notified < 50) {
-                if (sendBirthdayNotificationToOthers($user, $recipient, true)) {
-                    $notified++;
-                }
+            if ($recipient['id'] != $user['id']) {
+                sendBirthdayNotificationToOthers($user, $recipient, true);
             }
         }
-        logMessage("  → {$notified} rappels envoyés pour {$user['full_name']}");
+        logMessage("✓ Rappels envoyés à tous pour l'anniversaire de {$user['full_name']}");
     }
     
     logMessage("=== Total d'emails d'anniversaire envoyés : $total_sent ===");

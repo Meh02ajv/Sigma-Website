@@ -285,6 +285,11 @@ $member_count = $result->fetch_assoc()['member_count'];
                         <i class="fas fa-users"></i>
                         <span><?php echo $member_count; ?> membres</span>
                     </div>
+                    <div class="meta-item">
+                        <a href="mod_prof.php?from=dashboard.php" style="text-decoration: none; color: var(--primary-blue); font-weight: 600;">
+                            <i class="fas fa-edit"></i> Modifier mon profil
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

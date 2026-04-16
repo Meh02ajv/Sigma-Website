@@ -855,11 +855,13 @@ $user_full_name = isset($_SESSION['full_name']) ? htmlspecialchars($_SESSION['fu
                             <i class="fas fa-users"></i> <span>Bureau</span>
                         </a>
                     </li>
+                    <?php if (!$isLoggedIn): ?>
                     <li>
                         <a href="contact.php" <?php echo $current_page == 'contact.php' ? 'class="active"' : ''; ?>>
                             <i class="fas fa-envelope"></i> <span>Contact</span>
                         </a>
                     </li>
+                    <?php endif; ?>
                     
                     <?php if ($isLoggedIn): ?>
                         <li>
@@ -869,7 +871,7 @@ $user_full_name = isset($_SESSION['full_name']) ? htmlspecialchars($_SESSION['fu
                             </a>
                         </li>
                         <li>
-                            <a href="mod_prof.php?from=dashboard.php" <?php echo $current_page == 'profil.php' ? 'class="active"' : ''; ?>>
+                            <a href="mod_prof.php?from=dashboard.php" <?php echo $current_page == 'mod_prof.php' ? 'class="active"' : ''; ?>>
                                 <i class="fas fa-user-circle"></i> <span>Profil</span>
                             </a>
                         </li>

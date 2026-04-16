@@ -84,6 +84,31 @@ InfinityFree bloque tous les ports SMTP pour éviter le spam:
 
 ---
 
+## 🌐 Configuration du Nom de Domaine et URLs
+
+### 1. Structure des URLs (Automatique)
+Le projet est conçu pour être **agnostique du domaine**. Cela signifie qu'il détecte automatiquement s'il est exécuté sur `localhost`, sur un sous-domaine technique (comme `rf.gd`), ou sur votre domaine final (ex: `www.votre-association.com`).
+
+**Comment ça marche :**
+Dans [config.php](config.php), le script utilise `$_SERVER['HTTP_HOST']` pour construire les liens de redirection et les liens envoyés par email. Vous n'avez donc **pas besoin de modifier les URLs dans le code source** lors du changement de domaine.
+
+### 2. Pointage du Domaine (DNS)
+Si vous achetez un nom de domaine séparément de votre hébergement :
+1. Connectez-vous à votre registraire (ex: Namecheap, GoDaddy).
+2. Modifiez les **Serveurs de noms (Nameservers)** pour pointer vers ceux de votre hébergeur (ex: `ns1.hostinger.com`, `ns2.hostinger.com`).
+3. Attendez la propagation DNS (généralement 1h à 24h).
+
+### 3. Installation dans un Sous-dossier vs Racine
+- **Recommandé (Racine) :** Uploadez le contenu du dossier `Sigma-Website` directement dans le dossier `public_html` (ou `www`) de votre serveur. Votre site sera accessible via `https://votre-domaine.com`.
+- **Sous-dossier :** Si vous uploadez dans un dossier (ex: `public_html/sigma/`), le site sera accessible via `https://votre-domaine.com/sigma/`. Les liens relatifs s'adapteront automatiquement.
+
+### 4. Certificat SSL (HTTPS)
+Pour la sécurité des données (mots de passe, emails), le HTTPS est **obligatoire**.
+- La plupart des hébergeurs proposent **Let's Encrypt** gratuitement. Activez-le dans votre panneau de contrôle (cPanel/hPanel).
+- Le fichier [.htaccess](.htaccess) à la racine est déjà configuré pour rediriger automatiquement les visiteurs de `http` vers `https` si le certificat est présent.
+
+---
+
 ## 📁 Fichiers à Déployer
 
 ### Fichiers Essentiels

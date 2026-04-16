@@ -67,10 +67,12 @@ $current_year = date('Y');
             <div class="footer-col">
                 <h4>Navigation</h4>
                 <ul>
-                    <li><a href="accueil.php"><i class="fas fa-home"></i> Accueil</a></li>
+                    <li><a href="<?php echo $isLoggedIn ? 'dashboard.php' : 'accueil.php'; ?>"><i class="fas fa-home"></i> Accueil</a></li>
                     <li><a href="evenements.php"><i class="fas fa-calendar"></i> Événements</a></li>
                     <li><a href="bureau.php"><i class="fas fa-users"></i> Bureau</a></li>
+                    <?php if (!$isLoggedIn): ?>
                     <li><a href="contact.php"><i class="fas fa-envelope"></i> Contact</a></li>
+                    <?php endif; ?>
                 </ul>
             </div>
 
@@ -79,13 +81,16 @@ $current_year = date('Y');
                 <h4>Ressources</h4>
                 <ul>
                     <li><a href="reglement.php"><i class="fas fa-file-alt"></i> Règlement</a></li>
+                    <?php if (!$isLoggedIn): ?>
                     <li><a href="connexion.php?redirect=annuaire"><i class="fas fa-address-book"></i> Annuaire</a></li>
+                    <?php endif; ?>
                     <li><a href="objectifs.php"><i class="fas fa-bullseye"></i> Objectifs</a></li>
                     <li><a href="elections.php"><i class="fas fa-vote-yea"></i> Élections</a></li>
                 </ul>
             </div>
 
             <!-- Contact Info -->
+            <?php if (!$isLoggedIn): ?>
             <div class="footer-col footer-contact">
                 <h4>Contact</h4>
                 <div class="contact-items">
@@ -107,6 +112,7 @@ $current_year = date('Y');
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
         </div>
 
         <!-- Bottom Bar -->

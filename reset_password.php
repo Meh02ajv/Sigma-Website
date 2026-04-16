@@ -47,6 +47,7 @@ if (!$reset || strtotime($reset['expires_at']) < time()) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_once 'send_email.php';
     // Sanitize and validate new password
     $password = sanitize($_POST['password']);
     $confirm_password = sanitize($_POST['confirm_password']);
@@ -69,6 +70,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute();
             $stmt->close();
 
+            // Notifier l'administrateur
+            notifyAdminPasswordChanged($email);
+
             $_SESSION['success'] = "Votre mot de passe a été réinitialisé avec succès. Veuillez vous connecter à la Communauté Sigma.";
             header("Location: connexion.php");
             exit;
@@ -86,6 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Réinitialiser le mot de passe</title>
     <?php include 'includes/favicon.php'; ?>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -123,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 20px;
             border-radius: 10px;
             text-align: center;
-            width: 300px;
+            width: 320px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .logo {
@@ -134,22 +139,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #1e3a8a;
             margin-bottom: 20px;
         }
+        .password-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
         input {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
+            padding: 12px;
+            padding-right: 40px;
             border: 1px solid #ccc;
             border-radius: 5px;
             box-sizing: border-box;
+            background: white;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #1e3a8a;
+            z-index: 10;
         }
         button {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background-color: #1e3a8a;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
         }
         button:hover {
             background-color: #163172;
@@ -157,7 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .error {
             color: #e74c3c;
             font-size: 14px;
-            margin-top: 10px;
+            margin-bottom: 15px;
         }
         .success {
             color: #2ecc71;
@@ -174,11 +195,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p class="error"><?php echo $_SESSION['error']; unset($_SESSION['error']); ?></p>
         <?php } ?>
         <form method="POST" action="">
-            <input type="password" name="password" placeholder="Nouveau mot de passe" required>
-            <input type="password" name="confirm_password" placeholder="Confirmer le mot de passe" required>
+            <div class="password-container">
+                <input type="password" id="password" name="password" placeholder="Nouveau mot de passe" required>
+                <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+            </div>
+            <div class="password-container">
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirmer le mot de passe" required>
+                <i class="fas fa-eye toggle-password" id="toggleConfirmPassword"></i>
+            </div>
             <button type="submit">Réinitialiser</button>
         </form>
     </div>
+
+    <script>
+        function setupPasswordToggle(inputId, toggleId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(toggleId);
+
+            toggleIcon.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
+        }
+
+        setupPasswordToggle('password', 'togglePassword');
+        setupPasswordToggle('confirm_password', 'toggleConfirmPassword');
+    </script>
 </body>
 </html>
 <?php $conn->close(); ?>

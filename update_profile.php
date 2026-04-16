@@ -5,6 +5,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 require 'config.php';
+require_once 'send_email.php';
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
@@ -24,14 +25,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Validate CSRF token
-if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+// Validate CSRF token using global helper
+if (!isset($_POST['csrf_token']) || !verifyCSRF($_POST['csrf_token'])) {
     $_SESSION['error'] = "Erreur de validation du formulaire. Veuillez réessayer.";
     header("Location: mod_prof.php");
     exit;
 }
 
-unset($_SESSION['csrf_token']);
+// DO NOT unset the global csrf_token here to prevent session expiration issues
+// We keep the Same token during the session for better UX
 
 // Sanitize inputs
 $user_email = filter_var($_SESSION['user_email'], FILTER_SANITIZE_EMAIL);
@@ -86,7 +88,6 @@ $full_name = htmlspecialchars(trim($_POST['full_name']), ENT_QUOTES, 'UTF-8');
 $birth_date = htmlspecialchars(trim($_POST['birth_date']), ENT_QUOTES, 'UTF-8');
 $bac_year = filter_var($_POST['bac_year'], FILTER_SANITIZE_NUMBER_INT);
 $studies = htmlspecialchars(trim($_POST['studies']), ENT_QUOTES, 'UTF-8');
-$password = isset($_POST['password']) ? $_POST['password'] : null;
 
 // New optional fields
 $profession = isset($_POST['profession']) ? htmlspecialchars(trim($_POST['profession']), ENT_QUOTES, 'UTF-8') : null;
@@ -108,13 +109,6 @@ $current_year = date('Y');
 if ($bac_year < 1900 || $bac_year > $current_year) {
     $_SESSION['error'] = "L'année du bac doit être entre 1900 et $current_year.";
     header("Location: mod_prof.php");
-    exit;
-}
-
-// Validate password
-if ($password && strlen($password) < 8) {
-    $_SESSION['error'] = "Le mot de passe doit contenir au moins 8 caractères.";
-    header("Location: mod_prof.php?reset=1");
     exit;
 }
 
@@ -213,13 +207,6 @@ if ($profile_picture !== null) {
     $types .= "s";
 }
 
-if ($password) {
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-    $update_fields .= ", password = ?";
-    $params[] = $hashed_password;
-    $types .= "s";
-}
-
 $params[] = $user_email;
 $types .= "s";
 
@@ -232,9 +219,6 @@ if ($stmt->execute()) {
     $success_msg = "Profil mis à jour avec succès";
     if ($profile_picture !== null) {
         $success_msg .= " (photo de profil modifiée)";
-    }
-    if ($password) {
-        $success_msg .= " (mot de passe modifié)";
     }
     $_SESSION['success'] = $success_msg . ".";
 } else {

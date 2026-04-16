@@ -11,11 +11,30 @@ php_value max_input_time 600
 Options -Indexes
 DirectoryIndex index.php index.html
 
-# Protection des fichiers sensibles
-<FilesMatch "\.(log|sql|ini)$">
+# Protection des fichiers sensibles et dossiers techniques
+<FilesMatch "^\.env|composer\.(json|lock)|package(-lock)?\.json|config\.php$|.*\.sql$|.*\.log$">
     Order allow,deny
     Deny from all
 </FilesMatch>
+
+# Interdire l'accès aux fichiers commençant par un point
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Protection spécifique pour le dossier sessions
+<IfModule mod_authz_core.c>
+    <Directory "sessions">
+        Require all denied
+    </Directory>
+</IfModule>
+
+# Empêcher le reniflage de type MIME (No Sniff)
+Header set X-Content-Type-Options "nosniff"
+
+# XSS Protection
+Header set X-XSS-Protection "1; mode=block"
 
 # Compression GZIP pour améliorer les performances
 <IfModule mod_deflate.c>

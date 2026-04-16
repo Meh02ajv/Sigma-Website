@@ -151,6 +151,32 @@ $stmt->close();
         color: var(--primary-blue);
     }
 
+    .btn-reminder {
+        width: 100%;
+        padding: 0.8rem;
+        background: var(--primary-blue);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .btn-reminder:hover {
+        background: var(--secondary-blue);
+    }
+
+    .btn-reminder-added {
+        background: #27ae60 !important;
+        cursor: default;
+    }
+
     .no-events {
         text-align: center;
         padding: 2rem;
@@ -234,6 +260,26 @@ $stmt->close();
                                 <div><i class="fas fa-clock"></i> <?php echo date('H:i', strtotime($event['event_date'])); ?></div>
                                 <div><i class="fas fa-map-marker-alt"></i> <?php echo $event['location']; ?></div>
                             </div>
+                            
+                            <?php if (isset($_SESSION['user_id'])): ?>
+                                <?php
+                                $reminder_check_sql = "SELECT id FROM event_reminders WHERE user_id = ? AND event_id = ?";
+                                $stmt_rem = $conn->prepare($reminder_check_sql);
+                                $stmt_rem->bind_param("ii", $_SESSION['user_id'], $event['id']);
+                                $stmt_rem->execute();
+                                $reminder_exists = $stmt_rem->get_result()->num_rows > 0;
+                                $stmt_rem->close();
+                                ?>
+                                <?php if ($reminder_exists): ?>
+                                    <button class="btn-reminder btn-reminder-added" data-event-id="<?php echo $event['id']; ?>" disabled>
+                                        <i class="fas fa-bell"></i> Rappel ajouté
+                                    </button>
+                                <?php else: ?>
+                                    <button class="btn-reminder" data-event-id="<?php echo $event['id']; ?>">
+                                        <i class="far fa-bell"></i> M'avertir de cet événement
+                                    </button>
+                                <?php endif; ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -290,6 +336,44 @@ $stmt->close();
             // Afficher le contenu correspondant
             const tabId = btn.getAttribute('data-tab');
             document.getElementById(`${tabId}-events-content`).classList.add('active');
+        });
+    });
+
+    // Gestion des rappels
+    document.addEventListener('DOMContentLoaded', function() {
+        const reminderButtons = document.querySelectorAll('.btn-reminder:not(:disabled)');
+        
+        reminderButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const eventId = this.getAttribute('data-event-id');
+                const originalContent = this.innerHTML;
+                
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
+                this.disabled = true;
+                
+                fetch('add_reminder.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'event_id=' + encodeURIComponent(eventId)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.innerHTML = '<i class="fas fa-check"></i> Rappel ajouté';
+                        this.classList.add('btn-reminder-added');
+                        this.disabled = true;
+                    } else {
+                        this.innerHTML = originalContent;
+                        this.disabled = false;
+                        alert(data.message || 'Erreur lors de l\'ajout du rappel');
+                    }
+                })
+                .catch(error => {
+                    this.innerHTML = originalContent;
+                    this.disabled = false;
+                    alert('Erreur de connexion');
+                });
+            });
         });
     });
 </script>

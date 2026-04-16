@@ -10,9 +10,8 @@ $success = isset($_SESSION['success']) ? $_SESSION['success'] : '';
 $error = isset($_SESSION['error']) ? $_SESSION['error'] : '';
 unset($_SESSION['success'], $_SESSION['error']);
 
-// Generate CSRF token
-$csrf_token = bin2hex(random_bytes(32));
-$_SESSION['csrf_token'] = $csrf_token;
+// Generate CSRF token (handled globally in config.php, but keep local for use in forms)
+$csrf_token = $_SESSION['csrf_token'];
 
 // Capturer la page de référence si fournie
 $return_page = isset($_GET['from']) ? $_GET['from'] : 'settings.php';
@@ -384,24 +383,16 @@ $default_image = 'img/profile_pic.jpeg';
                 </div>
                 
                 <div class="form-group">
-                    <label for="email">Adresse e-mail <span class="toggle-email" onclick="toggleEmail()">Afficher</span></label>
+                    <label for="email" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <span>Adresse e-mail</span>
+                        <span class="toggle-email" onclick="toggleEmail()" style="margin-left: auto;">Afficher</span>
+                    </label>
                     <div class="input-icon">
                         <i class="fas fa-envelope"></i>
-                        <input type="email" id="email" name="email" class="form-control" value="<?php echo htmlspecialchars($user_email); ?>" readonly required>
+                        <input type="password" id="email" name="email" class="form-control" value="<?php echo htmlspecialchars($user_email); ?>" readonly required>
                     </div>
                 </div>
-                
-                <?php if (isset($_GET['reset'])): ?>
-                    <div class="form-group">
-                        <label for="password">Nouveau mot de passe</label>
-                        <div class="input-icon">
-                            <i class="fas fa-lock"></i>
-                            <input type="password" id="password" name="password" class="form-control" placeholder="Nouveau mot de passe" minlength="8">
-                        </div>
-                        <p class="password-help">Minimum 8 caractères</p>
-                    </div>
-                <?php endif; ?>
-                
+
                 <div class="form-group">
                     <label for="birth_date">Date de naissance</label>
                     <div class="input-icon">
@@ -541,11 +532,11 @@ $default_image = 'img/profile_pic.jpeg';
         function toggleEmail() {
             const emailInput = document.getElementById('email');
             const toggleSpan = document.querySelector('.toggle-email');
-            if (emailInput.type === 'email') {
+            if (emailInput.type === 'password') {
                 emailInput.type = 'text';
                 toggleSpan.textContent = 'Masquer';
             } else {
-                emailInput.type = 'email';
+                emailInput.type = 'password';
                 toggleSpan.textContent = 'Afficher';
             }
         }

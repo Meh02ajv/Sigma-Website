@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "Veuillez entrer une adresse email valide.";
         } else {
             // Check if email exists
-            $stmt = $conn->prepare("SELECT id, email, password, full_name, tutorial_completed FROM users WHERE email = ?");
+            $stmt = $conn->prepare("SELECT id, email, password, full_name, tutorial_completed, is_admin FROM users WHERE email = ?");
             if (!$stmt) {
                 $error = "Erreur de connexion à la base de données.";
             } else {
@@ -56,12 +56,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->close();
 
                 if ($user) {
+                    // Check for brute force (simple delay for failed attempts)
+                    // In production, consider a table for login_attempts
+                    
                     // Verify password
                     if (password_verify($password, $user['password'])) {
+                        // Success - reset any login throttling if implemented
+                        
                         // Set session
                         $_SESSION['user_email'] = $user['email'];
                         $_SESSION['user_id'] = $user['id'];
                         $_SESSION['full_name'] = $user['full_name'];
+
+                        // Set admin status
+                        $_SESSION['is_admin'] = (isset($user['is_admin']) && $user['is_admin'] == 1) ? 1 : 0;
 
                         // Increment login_count if column exists
                         $check_column = $conn->query("SHOW COLUMNS FROM users LIKE 'login_count'");

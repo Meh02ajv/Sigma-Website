@@ -1,17 +1,12 @@
 <?php 
 include 'header.php';
 
-// Generate CSRF token if not already set
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-
 $login_error = '';
 
 // Login processing
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
-    // Verify CSRF token
-    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+    // Verify CSRF token using global helper
+    if (!isset($_POST['csrf_token']) || !verifyCSRF($_POST['csrf_token'])) {
         $login_error = "Erreur de validation du formulaire. Veuillez réessayer.";
     } else {
         $email = trim($_POST['email'] ?? '');
@@ -911,35 +906,6 @@ $member_count = $result ? $result->fetch_assoc()['member_count'] : 0;
                     echo $event['location'];
                     echo '</div>';
                     
-                    // Add reminder button
-                    echo '<div class="reminder-section">';
-                    if (isset($_SESSION['user_id'])) {
-                        // Check if user already set a reminder
-                        $reminder_check_sql = "SELECT id FROM event_reminders WHERE user_id = ? AND event_id = ?";
-                        $stmt = $conn->prepare($reminder_check_sql);
-                        
-                        if ($stmt) {
-                            $stmt->bind_param("ii", $_SESSION['user_id'], $event['id']);
-                            $stmt->execute();
-                            $reminder_exists = $stmt->get_result()->num_rows > 0;
-                            $stmt->close();
-                            
-                            if ($reminder_exists) {
-                                echo '<button class="btn-reminder btn-reminder-added" data-event-id="' . $event['id'] . '" disabled>';
-                                echo '<i class="fas fa-bell"></i> Rappel ajouté';
-                                echo '</button>';
-                            } else {
-                                echo '<button class="btn-reminder" data-event-id="' . $event['id'] . '">';
-                                echo '<i class="far fa-bell"></i> Ajouter un rappel';
-                                echo '</button>';
-                            }
-                        }
-                    } else {
-                        echo '<button class="btn-reminder" onclick="showLoginAlert()">';
-                        echo '<i class="far fa-bell"></i> Ajouter un rappel';
-                        echo '</button>';
-                    }
-                    echo '</div>';
                     echo '</div>';
                 }
             } else {

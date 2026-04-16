@@ -45,201 +45,66 @@ SIGMA Alumni est une plateforme sociale dédiée aux anciens élèves permettant
 
 ---
 
-## ✨ Fonctionnalités
+## ✨ Fonctionnalités (Récapitulatif Complet)
 
-### 🔐 Authentification & Sécurité
-- Inscription avec code de vérification
-- Connexion sécurisée (bcrypt + sessions PHP)
-- Toggle de visibilité du mot de passe (création compte & connexion)
-- Récupération de mot de passe par email
-- Protection CSRF et validation des entrées
-- Support complet UTF-8 pour tous les caractères (français, accents, apostrophes)
-- **Tutoriel interactif** au premier login (Driver.js)
-- Guide contextuel disponible dans les paramètres
+### 🔐 Sécurité & Authentification
+- **Inscription & Connexion** : Inscription sécurisée, connexion avec régénération automatique d'ID de session, et protection contre les attaques par force brute.
+- **Sécurité Avancée** : Protection CSRF globale, validation stricte des entrées via `sanitize()`, headers de sécurité (CSP, XSS Protection, No-Sniff), et support complet UTF-8.
+- **Mot de Passe** : Toggle de visibilité du mot de passe et réinitialisation sécurisée par e-mail avec tokens temporaires.
+- **Onboarding** : Tutoriel interactif (Driver.js) pour guider les nouveaux membres lors de leur première connexion.
 
-### 👤 Profils Enrichis
-- Profil personnalisable (photo, bio, études, promotion)
-- Recherche avancée avec filtres multiples
-- Annuaire dynamique (yearbook)
-- **Yearbook public** accessible sans connexion
-- Autocomplétion des utilisateurs
+### 👤 Profils & Annuaire Dynamique
+- **Profils Enrichis** : Photo de profil, biographie, année de bac, études, profession et entreprise.
+- **Filtres de Recherche** : Recherche avancée par nom, promotion ou domaine d'expertise.
+- **Yearbook Interactif** : Accès complet pour les membres et version publique restreinte pour la visibilité web.
+- **Vie Privée** : Option pour masquer ou afficher son e-mail sur son profil public.
 
-### 💬 Messagerie Temps Réel
-- WebSocket pour communication instantanée
-- Conversations privées 1-to-1
-- Tri automatique par conversation la plus récente
-- Indicateurs de messages non lus
-- Suppression automatique des anciens messages
-- Navigation contextuelle (retour intelligent)
-- Système de notifications intégré
+### 💬 Messagerie & Notifications Temps Réel
+- **WebSocket (Ratchet)** : Messagerie instantanée fluide permettant des discussions en temps réel.
+- **Système de Notifications** : Alertes centralisées pour les messages, les nouveaux événements, les élections et les anniversaires.
+- **Optimisation** : Suppression automatique des messages obsolètes et marquage de lecture groupé.
 
-### 🔔 Notifications
-- **Types de notifications** :
-  - Messages privés
-  - Nouveaux événements
-  - Élections en cours
-  - Activités de l'association
-- Badge de compteur global
-- Centre de notifications dédié
-- Marquage lu/non-lu
-- Auto-archivage après 30 jours
+### 📅 Événements & Automatisations
+- **Gestionnaire d'Événements** : Publication d'événements avec galeries photos, descriptions et gestion des rappels.
+- **Rappels E-mails (CRON)** : Envoi automatique de notifications par e-mail **2 heures** et **1 heure** avant le début d'un événement pour les participants.
+- **Anniversaires** : 
+    - Notification communautaire à **J-2** envoyée à tous les membres.
+    - E-mail spécial de félicitations envoyé à l'intéressé le jour J.
+- **Vœux** : Envoi automatique d'e-mails de bonne année le 1er janvier à minuit.
 
-### 📅 Gestion d'Événements
-- Création et publication d'événements
-- Affichage chronologique (événements à venir et passés)
-- Upload d'images pour chaque événement
-- Système de rappels personnalisés
-- Interface d'administration complète
-
-### 🗳️ Système Électoral
-- Création de campagnes électorales
-- Upload de vidéos et photos de candidats
-- Vote sécurisé avec une voix par membre
-- Publication des résultats
-- Statistiques détaillées
-
-### 📸 Galerie de Souvenirs
-- Organisation par année (2023, 2024, 2025...)
-- Upload multiple de photos
-- Pagination dynamique (load more)
-- Albums souvenirs par promotion
-
-### 🎨 Personnalisation
-- **Thèmes festifs** : Noël, Halloween, Saint-Valentin, etc.
-- Gestion des thèmes par admin
-- CSS dynamique selon le thème actif
-- Activation/désactivation en un clic
-
-### 👨‍💼 Administration
-- Panneau d'administration sécurisé
-- Gestion des utilisateurs
-- Modération des contenus (actualités, événements, élections)
-- Gestion complète des règlements, objectifs et valeurs
-- Gestion des emails de masse avec logo intégré
-- Système de signalement et suggestions
-- Affichage correct des caractères spéciaux dans toutes les interfaces
-- **Gestion des images de fond** dynamiques
-
-### 🎂 Automatisation & Emails
-- **Anniversaires automatiques** : Email personnalisé le jour J
-- **Rappels d'anniversaire** : Notification aux membres 2 jours avant
-- **Voeux du Nouvel An** : Email festif automatique le 1er janvier
-- Emails HTML professionnels avec animations
-- Scripts CRON configurables (Windows Task Scheduler)
-- Logs détaillés de toutes les exécutions
+### 🗳️ Élections & Administration
+- **Élections du Bureau** : Candidatures avec photos/vidéos, vote à bulletin secret (un seul vote par membre), et support du vote blanc.
+- **Calcul des Résultats** : Gestion automatisée des égalités et affichage stylisé des vainqueurs.
+- **Dashboard Admin** : Panneau complet pour gérer les membres, actualités, thèmes festifs (Noël, Halloween), et paramètres généraux.
+- **Alertes Admin** : Réception d'un e-mail à chaque vote enregistré ou chaque réinitialisation de mot de passe.
 
 ---
 
-## 🚀 Installation
+## 🚀 Procédure d'Hébergement & Déploiement
 
-### Prérequis
-- **PHP** 7.4 ou supérieur
-- **MySQL** 5.7+ ou MariaDB 10.3+
-- **Composer** (pour les dépendances)
-- **Apache** ou **Nginx** avec mod_rewrite
-- **Extension PHP** : mysqli, session, mbstring, fileinfo
+### 1. Pré-requis Logiciels
+Pour faire fonctionner la plateforme, votre serveur doit disposer de :
+- **Serveur Web** : Apache 2.4+ (avec `mod_rewrite` activé) ou Nginx.
+- **PHP 7.4 ou 8.x** : Avec extensions `mysqli`, `openssl`, `mbstring`, `curl`, `fileinfo`.
+- **MySQL 5.7+** ou **MariaDB**.
+- **Composer** : Installé sur le serveur pour gérer les dépendances.
 
-### Installation rapide
+### 2. Documents & Paramètres Supplémentaires
+Avant la mise en ligne, préparez les éléments suivants :
+- **Certificat SSL (HTTPS)** : **Obligatoire** pour la sécurité des sessions et des cookies.
+- **Configuration SMTP** : Un compte e-mail (Gmail, Outlook ou SMTP professionnel) pour l'envoi des notifications.
+- **Accès SSH** : Recommandé pour lancer le serveur WebSocket en arrière-plan.
+- **Permissions** : Dossiers `uploads/`, `sessions/`, `logs/` et `souvenirs_pic/` doivent être accessibles en écriture par le serveur web (ex: `755` ou `775`).
 
-1. **Cloner le dépôt**
-```bash
-git clone https://github.com/Meh02ajv/Sigma-Website.git
-cd Sigma-Website
-```
-
-2. **Installer les dépendances**
-```bash
-composer install
-```
-
-3. **Configurer la base de données**
-```bash
-# Créer la base de données
-mysql -u root -p -e "CREATE DATABASE laho CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-
-# Importer le schéma (voir GUIDE_INSTALLATION_SQL.md pour détails)
-mysql -u root -p laho < sql/schema.sql
-```
-
-4. **Configurer l'application**
-```bash
-# Copier le fichier de configuration
-cp config.example.php config.php
-
-# Éditer config.php avec vos paramètres
-nano config.php
-```
-
-5. **Configurer Apache**
-```apache
-<VirtualHost *:80>
-    ServerName sigma-alumni.local
-    DocumentRoot "C:/xampp/htdocs/Sigma-Website"
-    
-    <Directory "C:/xampp/htdocs/Sigma-Website">
-        AllowOverride All
-        Require all granted
-    </Directory>
-</VirtualHost>
-```
-
-6. **Démarrer le serveur WebSocket**
-```bash
-php websocket_server.php
-```
-
-7. **Accéder à l'application**
-```
-http://localhost/Sigma-Website
-ou
-http://sigma-alumni.local
-```
-
----
-
-## ⚙️ Configuration
-
-### config.php
-Fichier principal de configuration :
-
-```php
-<?php
-// Base de données
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'laho');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-
-// Email (PHPMailer)
-define('SMTP_HOST', 'smtp.gmail.com');
-define('SMTP_USER', 'votre-email@gmail.com');
-define('SMTP_PASS', 'votre-mot-de-passe-app');
-define('SMTP_PORT', 587);
-
-// WebSocket
-define('WEBSOCKET_HOST', 'localhost');
-define('WEBSOCKET_PORT', 8080);
-
-// Chemins
-define('BASE_URL', 'http://localhost/Sigma-Website');
-define('UPLOAD_PATH', __DIR__ . '/uploads/');
-
-// Sécurité
-define('SESSION_LIFETIME', 7200); // 2 heures
-define('ENABLE_CSRF', true);
-```
-
-### Configuration des uploads
-Voir [CONFIG_VIDEO_UPLOAD.md](docs/CONFIG_VIDEO_UPLOAD.md) pour :
-- Limites de taille des fichiers
-- Types MIME autorisés
-- Permissions des dossiers
-
-### Configuration email
-Voir [EMAIL_SYSTEM_DOCS.md](docs/EMAIL_SYSTEM_DOCS.md) pour :
-- Configuration SMTP
-- Templates d'emails
-- Système de files d'attente
+### 3. Étapes d'Hébergement
+1. **Téléversement** : Copiez tous les fichiers sur votre espace d'hébergement.
+2. **Installation SQL** : Importez tous les fichiers situés dans le dossier `/sql/` (commencez par le schéma de base, puis les additifs).
+3. **Dépendances** : Exécutez `composer install` à la racine pour installer PHPMailer et les outils WebSocket.
+4. **Configuration** : Initialisez le fichier `.env` ou `config.php` avec les identifiants de production.
+5. **CRON Jobs** : Configurez les tâches programmées sur votre panel d'hébergement :
+   - `0 8 * * * php /chemin/vers/cron_birthday.php` (Tous les jours à 8h)
+   - `*/15 * * * * php /chemin/vers/cron_event_reminders.php` (Toutes les 15 min)
+6. **Lancement WebSocket** : Exécutez `php websocket_server.php` (idéalement via un gestionnaire de processus comme `PM2` ou un `systemd service` pour qu'il redémarre automatiquement).
 
 ---
 

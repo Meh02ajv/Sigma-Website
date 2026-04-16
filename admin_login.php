@@ -1,27 +1,15 @@
 <?php
 require 'config.php';
 
-// Hardcoded admin credentials
-define('ADMIN_EMAIL', 'meh.ajavon@ashesi.edu.gh');
-define('ADMIN_PASSWORD', 'KOBAhariel123');
-
-// Ensure session is started
-if (!isset($_SESSION)) {
+// Ensure session is started (already handled in config.php, but keeping for safety)
+if (session_status() === PHP_SESSION_NONE) {
     session_start();
-    error_log("Session started in admin_login.php");
-} else {
-    error_log("Session already started in admin_login.php");
-}
-
-// Generate CSRF token for the login form
-if (!isset($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 // Handle login
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Verify CSRF token
-    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+    // Verify CSRF token using global helper
+    if (!isset($_POST['csrf_token']) || !verifyCSRF($_POST['csrf_token'])) {
         $_SESSION['error'] = "Erreur de validation CSRF.";
         error_log("CSRF validation failed for login attempt");
         header("Location: admin_login.php");
@@ -31,20 +19,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = isset($_POST['email']) ? filter_var($_POST['email'], FILTER_SANITIZE_EMAIL) : '';
     $password = isset($_POST['password']) ? $_POST['password'] : '';
 
-    // Debug: Log submitted credentials
-    error_log("Login attempt - Email: $email");
+    // Utilisation des constantes de config.php pour plus de sécurité
+    // ADMIN_EMAIL et ADMIN_PASSWORD_HASH sont définis dans config.php
+    $admin_email = defined('ADMIN_EMAIL') ? ADMIN_EMAIL : 'admin@sigma.com';
+    $password_hash = defined('ADMIN_PASSWORD_HASH') ? ADMIN_PASSWORD_HASH : password_hash('Admin123!', PASSWORD_BCRYPT);
 
     if (empty($email) || empty($password)) {
         $_SESSION['error'] = "Veuillez entrer un email et un mot de passe.";
-        error_log("Empty email or password submitted");
-    } elseif ($email !== ADMIN_EMAIL || $password !== ADMIN_PASSWORD) {
+    } elseif ($email !== $admin_email || !password_verify($password, $password_hash)) {
         $_SESSION['error'] = "Email ou mot de passe incorrect.";
-        error_log("Credentials mismatch: Email=$email, Password=$password");
     } else {
         $_SESSION['admin_logged_in'] = true;
-        error_log("Login successful for $email");
-        // Regenerate CSRF token after successful login
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        // Régénération de l'ID de session pour prévenir la fixation de session
+        session_regenerate_id(true);
         header("Location: admin.php");
         exit;
     }

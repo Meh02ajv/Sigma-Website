@@ -334,3 +334,33 @@ function sendVotingStartNotificationEmails($election_id, $conn) {
     
     return $stats;
 }
+
+/**
+ * Envoie un email à l'admin pour notifier qu'un utilisateur a voté
+ * @param string $userName Nom du votant
+ * @param string $userEmail Email du votant
+ * @param string $electionTitle Titre de l'élection
+ * @return bool
+ */
+function notifyAdminUserVoted($userName, $userEmail, $electionTitle) {
+    $subject = "🗳️ Un utilisateur a voté - $electionTitle";
+    $body = "<p>L'utilisateur <strong>" . htmlspecialchars($userName, ENT_QUOTES, 'UTF-8') . "</strong> (" . htmlspecialchars($userEmail, ENT_QUOTES, 'UTF-8') . ") vient de voter pour l'élection <strong>" . htmlspecialchars($electionTitle, ENT_QUOTES, 'UTF-8') . "</strong>.</p>\n<p>Consultez le tableau de bord admin pour plus de détails.</p>";
+    return sendEmail(ADMIN_NOTIFICATION_EMAIL, 'Admin SIGMA', $subject, $body);
+}
+
+/**
+ * Notifie l'admin d'un changement de mot de passe utilisateur
+ * 
+ * @param string $userEmail Email de l'utilisateur
+ * @return bool
+ */
+function notifyAdminPasswordChanged($userEmail) {
+    $subject = "🔒 Changement de mot de passe - SIGMA Alumni";
+    $body = "
+        <h2>Alerte de sécurité</h2>
+        <p>L'utilisateur avec l'adresse e-mail <strong>" . htmlspecialchars($userEmail, ENT_QUOTES, 'UTF-8') . "</strong> a réinitialisé son mot de passe avec succès.</p>
+        <p>Date de l'action : " . date('d/m/Y H:i:s') . "</p>
+        <p>Si cet utilisateur n'est pas à l'origine de cette demande, une enquête de sécurité peut être nécessaire.</p>
+    ";
+    return sendEmail(ADMIN_NOTIFICATION_EMAIL, 'Admin SIGMA', $subject, $body);
+}

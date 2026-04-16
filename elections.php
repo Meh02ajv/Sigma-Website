@@ -1003,19 +1003,73 @@ $full_name = $user_info['full_name'] ?? 'Utilisateur';
                                     <div class="bg-white rounded-lg shadow-sm p-4">
                                         <?php
                                             $winner = $position_results[0]['name'] !== 'Votes blancs' ? $position_results[0] : ($position_results[1] ?? null);
-                                            $winner_candidate = null;
-                                            
-                                            if ($winner && $winner['name'] !== 'Votes blancs') {
-                                                foreach ($candidates_by_position[$position] as $candidate) {
-                                                    if ($candidate['full_name'] === $winner['name']) {
-                                                        $winner_candidate = $candidate;
-                                                        break;
+                                            $winners = [];
+                                            $is_equality = false;
+
+                                            // Vérifier s'il y a égalité entre les premiers candidats (hors votes blancs)
+                                            // On filtre d'abord pour n'avoir que les candidats (pas les votes blancs)
+                                            $candidates_only = array_filter($position_results, function($r) {
+                                                return $r['name'] !== 'Votes blancs';
+                                            });
+                                            $candidates_only = array_values($candidates_only); // Réindexer
+
+                                            if (count($candidates_only) >= 2) {
+                                                if ($candidates_only[0]['votes'] === $candidates_only[1]['votes'] && $candidates_only[0]['votes'] > 0) {
+                                                    $is_equality = true;
+                                                    $max_votes = $candidates_only[0]['votes'];
+                                                    foreach ($candidates_only as $c) {
+                                                        if ($c['votes'] === $max_votes) {
+                                                            $winners[] = $c;
+                                                        }
                                                     }
+                                                }
+                                            }
+
+                                            if (!$is_equality) {
+                                                $winner = $candidates_only[0] ?? null;
+                                                if ($winner) {
+                                                    $winners[] = $winner;
                                                 }
                                             }
                                         ?>
                                         
-                                        <?php if ($winner && $winner['name'] !== 'Votes blancs'): ?>
+                                        <?php if ($is_equality): ?>
+                                            <div class="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                                <div class="flex items-center space-x-2 text-yellow-800 font-bold mb-3">
+                                                    <i class="fas fa-balance-scale"></i>
+                                                    <span>ÉGALITÉ</span>
+                                                </div>
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    <?php foreach ($winners as $w): 
+                                                        $w_candidate = null;
+                                                        foreach ($candidates_by_position[$position] as $candidate) {
+                                                            if ($candidate['full_name'] === $w['name']) {
+                                                                $w_candidate = $candidate;
+                                                                break;
+                                                            }
+                                                        }
+                                                    ?>
+                                                        <div class="flex items-center space-x-3 p-2 bg-white rounded shadow-sm">
+                                                            <img src="<?php echo getProfilePicture($w_candidate['profile_picture'] ?? ''); ?>" 
+                                                                alt="Candidat" class="h-10 w-10 rounded-full border border-gray-200">
+                                                            <div>
+                                                                <div class="font-medium text-sm"><?php echo $w['name']; ?></div>
+                                                                <div class="text-xs text-gray-500"><?php echo $w['votes']; ?> votes</div>
+                                                            </div>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </div>
+                                        <?php elseif (!empty($winners)): 
+                                            $winner = $winners[0];
+                                            $winner_candidate = null;
+                                            foreach ($candidates_by_position[$position] as $candidate) {
+                                                if ($candidate['full_name'] === $winner['name']) {
+                                                    $winner_candidate = $candidate;
+                                                    break;
+                                                }
+                                            }
+                                        ?>
                                             <div class="flex items-center justify-between mb-3">
                                                 <div class="flex items-center space-x-3">
                                                     <div class="profile-avatar">
@@ -1031,16 +1085,11 @@ $full_name = $user_info['full_name'] ?? 'Utilisateur';
                                                     </div>
                                                 </div>
                                                 <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                                                    <?php echo ($position === 'Président') ? 'Élu' : 'Élue'; ?>
+                                                    <?php echo ($position === 'Président') ? 'Élu' : 'Élu(e)'; ?>
                                                 </span>
                                             </div>
                                             <div class="w-full bg-gray-200 rounded-full h-2.5">
                                                 <div class="bg-blue-600 h-2.5 rounded-full" style="width: <?php echo $winner['percentage']; ?>%"></div>
-                                            </div>
-                                        <?php elseif ($winner): ?>
-                                            <div class="text-center py-4 text-gray-500">
-                                                <i class="fas fa-info-circle mr-2"></i>
-                                                Les votes blancs ont remporté cette élection avec <?php echo $winner['percentage']; ?>% des votes.
                                             </div>
                                         <?php endif; ?>
                                         
